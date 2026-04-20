@@ -104,8 +104,6 @@ export default function Login() {
                 </div>
 
                 <div style={{ textAlign: 'center', marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--b1)', fontSize: '0.72rem', color: 'var(--txt3)' }}>
-                    Demo: <span style={{ color: 'var(--acc)', cursor: 'pointer' }} onClick={() => { setEmail('admin@openwork.io'); setPassword('admin123'); }}>Admin</span>
-                    {' · '}
                     <span style={{ color: 'var(--acc)', cursor: 'pointer' }} onClick={() => { setEmail('emily@client.io'); setPassword('password123'); }}>Client</span>
                     {' · '}
                     <span style={{ color: 'var(--acc)', cursor: 'pointer' }} onClick={() => { setEmail('chander@freelancer.io'); setPassword('password123'); }}>Freelancer</span>
