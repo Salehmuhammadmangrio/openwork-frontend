@@ -19,6 +19,7 @@ export default function DashMessages() {
         addMessage,
         markMessagesAsRead,
         updateConversationUnreadCount,
+        updateMessageStatus,
         setActive,
         loadingConversations,
         loadingMessages,
@@ -104,11 +105,23 @@ export default function DashMessages() {
             // No need for window.dispatchEvent anymore
         });
 
+        // Handle message status update from AI analysis
+        socket.on('message:status-update', ({ messageId, contentStatus, contentScore, flaggedAt }) => {
+            if (activeConversationId) {
+                updateMessageStatus(activeConversationId, messageId, {
+                    contentStatus,
+                    contentScore,
+                    flaggedAt,
+                });
+            }
+        });
+
         return () => {
             socket.off('chat:message');
             socket.off('messages_seen');
+            socket.off('message:status-update');
         };
-    }, [activeConversationId, user?._id, addMessage, markMessagesAsRead, updateConversationUnreadCount]);
+    }, [activeConversationId, user?._id, addMessage, markMessagesAsRead, updateConversationUnreadCount, updateMessageStatus]);
 
     const sendMessage = async () => {
         if (!input.trim() || !activeConversationId) return;
@@ -318,18 +331,19 @@ export default function DashMessages() {
                                 const contentStatus = msg.contentStatus || 'pending';
                                 const contentScore = msg.contentScore || 0;
 
-                                // Determine safety badge
-                                const getSafetyBadge = () => {
-                                    if (contentStatus === 'unsafe') {
-                                        return { emoji: '🚫', label: 'Unsafe', color: '#ef4444' };
+                                // Status badge styling
+                                const getStatusBadge = () => {
+                                    if (contentStatus === 'pending') {
+                                        return { emoji: '⏳', label: 'Analyzing...', color: '#f59e0b' };
                                     } else if (contentStatus === 'safe') {
-                                        return { emoji: '✓', label: 'Safe', color: '#22c55e' };
-                                    } else {
-                                        return { emoji: '⏳', label: 'Scanning...', color: '#f59e0b' };
+                                        return { emoji: '✅', label: 'Safe', color: '#10b981' };
+                                    } else if (contentStatus === 'unsafe') {
+                                        return { emoji: '⚠️', label: 'Unsafe', color: '#ef4444' };
                                     }
+                                    return { emoji: '❓', label: 'Unknown', color: '#6b7280' };
                                 };
 
-                                const safetyBadge = getSafetyBadge();
+                                const statusBadge = getStatusBadge();
 
                                 return (
                                     <div
@@ -352,7 +366,6 @@ export default function DashMessages() {
                                                     fontSize: '0.9rem',
                                                     lineHeight: 1.55,
                                                     border: isMine ? 'none' : '1px solid var(--b1)',
-                                                    position: 'relative',
                                                 }}
                                             >
                                                 {msg.content}
@@ -367,27 +380,13 @@ export default function DashMessages() {
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: isMine ? 'flex-end' : 'flex-start',
-                                                    gap: 6,
-                                                    flexWrap: 'wrap',
+                                                    gap: 4,
                                                 }}
                                             >
-                                                {/* Safety Status Badge */}
-                                                <span
-                                                    title={`${safetyBadge.label} - Score: ${(contentScore * 100).toFixed(0)}%`}
-                                                    style={{
-                                                        display: 'inline-flex',
-                                                        alignItems: 'center',
-                                                        gap: '2px',
-                                                        padding: '2px 6px',
-                                                        borderRadius: '4px',
-                                                        background: safetyBadge.color + '20',
-                                                        color: safetyBadge.color,
-                                                        fontSize: '0.62rem',
-                                                        fontWeight: 600,
-                                                    }}
-                                                >
-                                                    <span>{safetyBadge.emoji}</span>
-                                                    <span>{safetyBadge.label}</span>
+                                                {/* Status Badge */}
+                                                <span title={`${statusBadge.label} (${(contentScore * 100).toFixed(0)}% confidence)`}
+                                                    style={{ fontSize: '0.7rem' }}>
+                                                    {statusBadge.emoji}
                                                 </span>
 
                                                 {formatRelative(msg.createdAt)}

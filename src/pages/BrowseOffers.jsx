@@ -260,15 +260,20 @@ export default function BrowseOffers() {
     finally { setLoading(false); }
   }, []);
 
-  const debouncedSearch = useCallback(
-    debounce(s => fetchOffers({ search: s, category, sort, page: 1, limit: 12 }), 400), [category, sort]
-  );
+  // Debounce search and reset to page 1
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPage(1);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [search]);
 
+  // Fetch offers when filters or page changes
   useEffect(
     () => {
       fetchOffers({ search, category, sort, page, limit: 12 });
     },
-    [category, sort, page]);
+    [category, sort, page, fetchOffers]);
 
   return (
     <div style={{ paddingTop: 64, minHeight: '100vh' }}>
@@ -284,7 +289,7 @@ export default function BrowseOffers() {
         <div className="discover-toolbar">
           <div className="discover-search-wrap">
             <span className="discover-search-icon">🔍</span>
-            <input className="discover-search" placeholder="Search offers..." value={search} onChange={e => { setSearch(e.target.value); debouncedSearch(e.target.value); }} />
+            <input className="discover-search" placeholder="Search offers..." value={search} onChange={e => setSearch(e.target.value)} />
           </div>
           <select className="discover-select" value={category} onChange={e => { setCategory(e.target.value); setPage(1); }}>
             <option value="">All Categories</option>

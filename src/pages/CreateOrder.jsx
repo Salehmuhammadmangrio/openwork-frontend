@@ -17,8 +17,8 @@ const CreateOrder = () => {
   const [selectedClient, setSelectedClient] = useState(initialClientId || null);
   const [clients, setClients] = useState([]);
   const [searchClient, setSearchClient] = useState('');
-  const [conversationClientIds, setConversationClientIds] = useState(new Set());
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [loadingClients, setLoadingClients] = useState(false);
 
   // Form fields
   const [formData, setFormData] = useState({
@@ -43,56 +43,28 @@ const CreateOrder = () => {
     }
   }, [isAuthenticated, orderType, user?.role]);
 
-  // Fetch conversations and extract client IDs
+  // Fetch all conversation clients once on component mount/when orderType changes
   useEffect(() => {
     if (orderType === 'custom' && isAuthenticated) {
-      fetchConversations();
+      fetchConversationClients();
     }
   }, [orderType, isAuthenticated]);
 
-  // Fetch clients list for freelancer (filtered by conversations)
-  useEffect(() => {
-    if (orderType === 'custom' && conversationClientIds.size > 0) {
-      fetchClients();
-    }
-  }, [orderType, searchClient, conversationClientIds]);
-
-  const fetchConversations = async () => {
+  const fetchConversationClients = async () => {
     try {
-      const { data } = await api.get('/messages/conversations');
-      if (data.conversations && data.conversations.length > 0) {
-        // Extract client IDs from conversations (filter out current user)
-        const clientIds = new Set();
-        data.conversations.forEach(conv => {
-          conv.participants?.forEach(participant => {
-            if (participant._id !== user?._id) {
-              clientIds.add(participant._id);
-            }
-          });
-        });
-        setConversationClientIds(clientIds);
-      } else {
-        setConversationClientIds(new Set());
-        setClients([]);
-      }
-    } catch (err) {
-      console.error('Failed to fetch conversations:', err);
-      setConversationClientIds(new Set());
-    }
-  };
-
-  const fetchClients = async () => {
-    try {
-      const { data } = await api.get('/users/clients', {
-        params: { search: searchClient, limit: 10 }
+      setLoadingClients(true);
+      const { data } = await api.get('/users/conversation-clients', {
+        params: { limit: 100 } // Fetch all clients without search filter
       });
 
-      const filteredClients = (data.users || []).filter(client =>
-        conversationClientIds.has(client._id)
-      );
-      setClients(filteredClients);
+      console.log('Fetched conversation clients:', data.users);
+
+      setClients(data.users || []);
     } catch (err) {
-      console.error('Failed to fetch clients:', err);
+      console.error('Failed to fetch conversation clients:', err);
+      setClients([]);
+    } finally {
+      setLoadingClients(false);
     }
   };
 
@@ -175,7 +147,7 @@ const CreateOrder = () => {
   };
 
   return (
-    <div style={{  minHeight: '100vh', background: 'var(--bg)' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       <div className="container" style={{ maxWidth: "calc(100% - 2rem)", margin: '0 auto', padding: '2rem 1.5rem' }}>
         {/* Header */}
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)} style={{ marginBottom: '2rem' }}>
@@ -252,36 +224,45 @@ const CreateOrder = () => {
                     maxHeight: '200px',
                     overflowY: 'auto',
                   }}>
-                    {clients.map(client => (
-                      <div
-                        key={client._id}
-                        onClick={() => {
-                          setSelectedClient(client._id);
-                          setSearchClient(client.fullName);
-                          setDropdownOpen(false);
-                        }}
-                        style={{
-                          padding: '0.75rem 1rem',
-                          cursor: 'pointer',
-                          borderBottom: '1px solid var(--b1)',
-                          fontSize: '.875rem',
-                          transition: 'background 0.2s',
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--s1)'}
-                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                      >
-                        <div style={{ fontWeight: 600 }}>{client.fullName}</div>
-                        <div style={{ fontSize: '.75rem', color: 'var(--txt2)' }}>{client.email}</div>
-                      </div>
-                    ))}
+                    {clients
+                      .filter(client =>
+                        client.fullName.toLowerCase().includes(searchClient.toLowerCase()) ||
+                        client.email.toLowerCase().includes(searchClient.toLowerCase())
+                      )
+                      .map(client => (
+                        <div
+                          key={client._id}
+                          onClick={() => {
+                            setSelectedClient(client._id);
+                            setSearchClient(client.fullName);
+                            setDropdownOpen(false);
+                          }}
+                          style={{
+                            padding: '0.75rem 1rem',
+                            cursor: 'pointer',
+                            borderBottom: '1px solid var(--b1)',
+                            fontSize: '.875rem',
+                            transition: 'background 0.2s',
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--s1)'}
+                          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <div style={{ fontWeight: 600 }}>{client.fullName}</div>
+                          <div style={{ fontSize: '.75rem', color: 'var(--txt2)' }}>{client.email}</div>
+                        </div>
+                      ))}
                   </div>
                 )}
               </div>
-              {conversationClientIds.size === 0 && (
+              {loadingClients ? (
+                <div style={{ fontSize: '.875rem', color: 'var(--txt2)', marginTop: '.5rem', padding: '0.75rem', background: 'var(--s1)', borderRadius: 8 }}>
+                  ⏳ Loading clients with conversations...
+                </div>
+              ) : clients.length === 0 ? (
                 <div style={{ fontSize: '.875rem', color: 'var(--txt2)', marginTop: '.5rem', padding: '0.75rem', background: 'var(--s1)', borderRadius: 8 }}>
                   📝 No clients with conversations yet. Start a conversation with clients first to create custom order proposals.
                 </div>
-              )}
+              ) : null}
               {selectedClient && (
                 <div style={{ fontSize: '.75rem', color: 'var(--acc)', marginTop: '.5rem' }}>
                   ✓ Client selected

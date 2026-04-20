@@ -87,4 +87,24 @@ export const useChatStore = create((set, get) => ({
       },
     },
   })),
+
+  /**
+   * Update message status when AI analysis completes
+   * Called when message:status-update socket event is received
+   */
+  updateMessageStatus: (conversationId, messageId, statusUpdate) => set((s) => {
+    const conversationMessages = s.messages[conversationId] || [];
+    const updatedMessages = conversationMessages.map(msg =>
+      msg._id === messageId
+        ? { ...msg, ...statusUpdate }
+        : msg
+    );
+
+    return {
+      messages: {
+        ...s.messages,
+        [conversationId]: updatedMessages,
+      },
+    };
+  }),
 }));

@@ -261,13 +261,15 @@ export default function BrowseJobs() {
     finally { setLoading(false); }
   }, []);
 
-  const debouncedSearch = useCallback(
-    debounce(s => {
+  // Debounce search and reset to page 1
+  useEffect(() => {
+    const timer = setTimeout(() => {
       setPage(1);
-      fetchJobs({ search: s, category, status: 'open', page: 1, limit: 12 });
-    }, 400), [category]
-  );
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [search]);
 
+  // Fetch jobs when filters or page changes
   useEffect(
     () => {
       const params = { status: 'open', page, limit: 12 };
@@ -277,10 +279,10 @@ export default function BrowseJobs() {
       if (typeFilter === 'fixed') params.budgetType = 'fixed';
       if (typeFilter === 'hourly') params.budgetType = 'hourly';
       fetchJobs(params);
-    }, [category, typeFilter, page]);
+    }, [category, typeFilter, page, fetchJobs]);
 
   const handleSearch = e => {
-    setSearch(e.target.value); debouncedSearch(e.target.value);
+    setSearch(e.target.value);
   };
 
   const filters = [
