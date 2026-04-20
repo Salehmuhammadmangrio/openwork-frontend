@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useFetch } from '../../hooks';
-import { Card, Badge, PageLoader, EmptyState, Pagination } from '../../components/common/UI';
-import { formatCurrency, formatDate } from '../../utils/helpers';
+import { Badge, PageLoader, EmptyState } from '../../components/common/UI';
+import { formatCompactCurrency, formatDate } from '../../utils/helpers';
 
 export default function WalletTopupHistory() {
   const [page, setPage] = useState(1);
@@ -10,39 +10,27 @@ export default function WalletTopupHistory() {
   const topups = data?.data || [];
   const pagination = data?.pagination;
 
-  const getStatusColor = (status) => {
+  const getStatusDisplay = (status) => {
     switch (status) {
       case 'released':
-        return 'bg-green-100 text-green-800';
+        return { icon: '✅', label: 'Confirmed', color: 'var(--ok)', bgColor: 'rgba(0,229,160,0.15)' };
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return { icon: '❌', label: 'Failed', color: 'var(--err)', bgColor: 'rgba(255,77,106,0.15)' };
       case 'failed':
-        return 'bg-red-100 text-red-800';
+        return { icon: '❌', label: 'Failed', color: 'var(--err)', bgColor: 'rgba(255,77,106,0.15)' };
       default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'released':
-        return '✅';
-      case 'pending':
-        return '⏳';
-      case 'failed':
-        return '❌';
-      default:
-        return '❓';
+        return { icon: '❓', label: status, color: 'var(--txt3)', bgColor: 'rgba(152,151,180,0.15)' };
     }
   };
 
   if (loading) return <PageLoader />;
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">Top-up History</h3>
-        <span className="text-sm text-gray-600">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '1rem', borderBottom: '1px solid var(--b1)' }}>
+        <h4 style={{ fontSize: '0.95rem', fontWeight: 700 }}>📊 Top-up Transactions</h4>
+        <span style={{ fontSize: '0.75rem', color: 'var(--txt3)', fontWeight: 600, background: 'rgba(0,229,160,0.1)', padding: '0.4rem 0.75rem', borderRadius: 6 }}>
           {pagination?.totalItems || 0} transactions
         </span>
       </div>
@@ -51,53 +39,147 @@ export default function WalletTopupHistory() {
         <EmptyState
           icon="💳"
           title="No Top-ups Yet"
-          description="Add funds to your wallet to get started"
+          description="Your wallet top-up transactions will appear here"
         />
       ) : (
         <>
-          <div className="space-y-3">
-            {topups.map((topup) => (
-              <Card key={topup._id} className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="text-3xl">💰</div>
-                    <div>
-                      <p className="font-semibold text-gray-900">
-                        {topup.description || 'Wallet Top-up'}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        {formatDate(topup.createdAt)}
-                      </p>
-                    </div>
+          {/* Transactions List */}
+          <div style={{ display: 'grid', gap: '0.75rem' }}>
+            {topups.map((topup) => {
+              const statusDisplay = getStatusDisplay(topup.status);
+              return (
+              <div key={topup._id} style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '1rem',
+                background: 'var(--s2)',
+                borderRadius: 10,
+                border: '1px solid var(--b1)',
+                transition: 'all 0.2s ease',
+                cursor: 'default'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'var(--s1)';
+                e.currentTarget.style.borderColor = statusDisplay.color;
+                e.currentTarget.style.boxShadow = `0 4px 12px ${statusDisplay.color}20`;
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'var(--s2)';
+                e.currentTarget.style.borderColor = 'var(--b1)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}>
+                {/* Left: Icon + Details */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 10,
+                    background: statusDisplay.bgColor,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.2rem',
+                    flexShrink: 0
+                  }}>
+                    💳
                   </div>
-
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-green-600">
-                      +{formatCurrency(topup.grossAmount)}
-                    </p>
-                    <Badge className={getStatusColor(topup.status)}>
-                      {getStatusIcon(topup.status)} {topup.status.charAt(0).toUpperCase() + topup.status.slice(1)}
-                    </Badge>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--txt)' }}>
+                      {topup.description || 'Wallet Top-up'}
+                    </div>
+                    <div style={{
+                      fontSize: '0.75rem',
+                      color: 'var(--txt3)',
+                      marginTop: '0.3rem',
+                      display: 'flex',
+                      gap: '0.5rem',
+                      alignItems: 'center'
+                    }}>
+                      <span>📅 {formatDate(topup.createdAt)}</span>
+                      {topup.metadata?.payfastPaymentId && (
+                        <span>•  ID: {topup.metadata.payfastPaymentId.substring(0, 8)}...</span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                {/* Metadata if available */}
-                {topup.metadata?.payfastPaymentId && (
-                  <div className="mt-3 pt-3 border-t text-xs text-gray-500">
-                    <p>Transaction ID: {topup.metadata.payfastPaymentId}</p>
+                {/* Right: Amount + Status */}
+                    <div style={{
+                    textAlign: 'right',
+                    marginLeft: '1rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-end',
+                    gap: '0.4rem'
+                  }}>
+                    <div style={{
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: '1rem',
+                      fontWeight: 700,
+                      color: topup.status === 'released' ? 'var(--ok)' : 'var(--err)'
+                    }}>
+                      {topup.status === 'released' ? '+' : ''}{formatCompactCurrency(topup.grossAmount)}
+                    </div>
+                    <Badge color={statusDisplay.color} style={{ fontSize: '0.65rem', padding: '0.3rem 0.65rem' }}>
+                      {statusDisplay.icon} {statusDisplay.label}
+                    </Badge>
                   </div>
-                )}
-              </Card>
-            ))}
+                </div>
+              );
+            })}
           </div>
 
           {/* Pagination */}
           {pagination && pagination.totalPages > 1 && (
-            <Pagination
-              currentPage={page}
-              totalPages={pagination.totalPages}
-              onPageChange={setPage}
-            />
+            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--b1)' }}>
+              <button
+                onClick={() => setPage(Math.max(1, page - 1))}
+                disabled={page === 1}
+                style={{
+                  padding: '0.5rem 0.75rem',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  border: '1px solid var(--b1)',
+                  borderRadius: 6,
+                  background: page === 1 ? 'var(--s2)' : 'var(--s1)',
+                  color: 'var(--txt)',
+                  cursor: page === 1 ? 'not-allowed' : 'pointer',
+                  opacity: page === 1 ? 0.5 : 1,
+                  transition: 'all 0.2s'
+                }}
+              >
+                ← Previous
+              </button>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0.5rem 1rem',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: 'var(--txt3)'
+              }}>
+                Page {page} of {pagination.totalPages}
+              </div>
+              <button
+                onClick={() => setPage(Math.min(pagination.totalPages, page + 1))}
+                disabled={page === pagination.totalPages}
+                style={{
+                  padding: '0.5rem 0.75rem',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  border: '1px solid var(--b1)',
+                  borderRadius: 6,
+                  background: page === pagination.totalPages ? 'var(--s2)' : 'var(--s1)',
+                  color: 'var(--txt)',
+                  cursor: page === pagination.totalPages ? 'not-allowed' : 'pointer',
+                  opacity: page === pagination.totalPages ? 0.5 : 1,
+                  transition: 'all 0.2s'
+                }}
+              >
+                Next →
+              </button>
+            </div>
           )}
         </>
       )}

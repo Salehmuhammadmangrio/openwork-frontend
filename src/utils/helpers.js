@@ -3,6 +3,39 @@
 export const formatCurrency = (amount, currency = 'USD') =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 0 }).format(amount || 0);
 
+export const formatCompactNumber = (num) => {
+  if (num === null || num === undefined) return '0';
+
+  const sign = num < 0 ? '-' : '';
+  let n = Math.abs(num);
+
+  // Handle rounding overflow (e.g., 999.9K → 1M)
+  if (n >= 999_500) n = Math.round(n);
+
+  if (n >= 1_000_000_000) {
+    const value = n / 1_000_000_000;
+    return sign + value.toFixed(1).replace(/\.0$/, '') + 'B';
+  }
+
+  if (n >= 1_000_000) {
+    const value = n / 1_000_000;
+    return sign + value.toFixed(1).replace(/\.0$/, '') + 'M';
+  }
+
+  if (n >= 1_000) {
+    const value = n / 1_000;
+    return sign + value.toFixed(1).replace(/\.0$/, '') + 'K';
+  }
+
+  return sign + Math.floor(n).toString();
+};
+export const formatCompactCurrency = (amount, currency = 'USD') => {
+  if (amount === null || amount === undefined) return '$0';
+  const symbol = new Intl.NumberFormat('en-US', { style: 'currency', currency }).formatToParts(0)[0].value;
+  const compact = formatCompactNumber(amount);
+  return `${symbol}${compact}`;
+};
+
 export const formatDate = (date, opts = {}) =>
   new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', ...opts });
 

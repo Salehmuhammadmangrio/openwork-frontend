@@ -5,7 +5,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 import { useAuthStore } from '../../store';
 import { useFetch } from '../../hooks';
 import { StatCard, Card, Badge, Button, ProgressBar, EmptyState, PageLoader } from '../../components/common/UI';
-import { formatCurrency, statusColor } from '../../utils/helpers';
+import { formatCurrency, statusColor, formatCompactCurrency } from '../../utils/helpers';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
 
@@ -165,14 +165,14 @@ export default function DashOverview() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px,1fr))', gap: '0.875rem', marginBottom: '1.75rem' }}>
         {isClient ? <>
           <StatCard label="Jobs Posted" value={postedJobs.length || 0} change="" changeType="nt" icon="💼" />
-          <StatCard label="Total Spent" value={formatCurrency(stats.totalSpent || 0)} change="▲ Platform total" changeType="up" icon="💰" valueColor="var(--acc2)" />
+          <StatCard label="Total Spent" value={formatCompactCurrency(stats.totalSpent || 0)} change="▲ Platform total" changeType="up" icon="💰" valueColor="var(--acc2)" />
           <StatCard label="Active Orders" value={stats.activeOrders || 0} change="In progress" changeType="nt" icon="📦" />
           <StatCard label="Proposals Rx" value={stats.totalProposals || 0} change="" changeType="nt" icon="📝" />
 
         </> : <>
           <StatCard label="Proposals" value={stats.totalProposals || 0} change="" changeType="nt" icon="📝" />
           <StatCard label="Completed" value={stats.completedJobs || 0} change="" changeType="nt" icon="✅" />
-          <StatCard label="Total Earned" value={formatCurrency(stats.totalEarned || 0)} change="" changeType="nt" icon="💰" valueColor="var(--acc2)" />
+          <StatCard label="Total Earned" value={formatCompactCurrency(stats.totalEarned || 0)} change="" changeType="nt" icon="💰" valueColor="var(--acc2)" />
 
           <StatCard label="AI Score" value={stats.aiSkillScore || 0} change="▲ +5 pts" changeType="up" icon="🤖" valueColor="var(--acc)" />
           <StatCard label="Rating" value={stats.averageRating?.toFixed(1) || "0.0"} change="★★★★★" changeType="nt" icon="⭐" />

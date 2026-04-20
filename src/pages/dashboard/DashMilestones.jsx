@@ -79,16 +79,12 @@ export default function DashMilestones() {
 
                                     {/* Overall Progress */}
                                     <div style={{ marginTop: '1.25rem' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                                            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Overall Progress</span>
-                                            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--acc)' }}>
-                                                {order.progress}/100%
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.75rem' }}>
+                                            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--acc)', fontFamily: "'IBM Plex Mono', monospace" }}>
+                                                {order.progress}%
                                             </span>
                                         </div>
-                                        <ProgressBar value={order.progress} style={{ marginBottom: '0.5rem' }} />
-                                        <div style={{ fontSize: '0.75rem', color: 'var(--txt3)', textAlign: 'right' }}>
-                                            {order.progress}% completed
-                                        </div>
+                                        <ProgressBar value={order.progress} />
                                     </div>
                                 </div>
 
@@ -203,8 +199,66 @@ export default function DashMilestones() {
                                             })}
                                         </div>
                                     ) : (
-                                        <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--txt3)' }}>
-                                            📋 No milestones set for this order
+                                        <div style={{ padding: '1.25rem', background: 'linear-gradient(135deg, rgba(108,78,246,0.05) 0%, rgba(0,229,160,0.05) 100%)', borderRadius: '12px', border: '1px solid var(--b1)' }}>
+                                            {/* Project Progress Info */}
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.75rem' }}>
+                                                {/* Progress Card */}
+                                                <div style={{
+                                                    padding: '0.75rem',
+                                                    background: 'var(--s2)',
+                                                    borderRadius: '8px',
+                                                    border: '1px solid var(--b1)',
+                                                    textAlign: 'center'
+                                                }}>
+                                                    <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--txt3)', marginBottom: '0.35rem' }}>Progress</div>
+                                                    <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--acc)', fontFamily: "'IBM Plex Mono', monospace" }}>
+                                                        {order.progress || 0}%
+                                                    </div>
+                                                    <ProgressBar value={order.progress || 0} style={{ marginTop: '0.5rem', height: '4px' }} />
+                                                </div>
+
+                                                {/* Order Status Card */}
+                                                <div style={{
+                                                    padding: '0.75rem',
+                                                    background: 'var(--s2)',
+                                                    borderRadius: '8px',
+                                                    border: '1px solid var(--b1)',
+                                                    textAlign: 'center'
+                                                }}>
+                                                    <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--txt3)', marginBottom: '0.35rem' }}>Status</div>
+                                                    <Badge color={statusColor(order.status)} style={{ display: 'inline-block', fontSize: '0.75rem' }}>
+                                                        {order.status?.replace(/_/g, ' ')}
+                                                    </Badge>
+                                                </div>
+
+                                                {/* Budget Info Card */}
+                                                <div style={{
+                                                    padding: '0.75rem',
+                                                    background: 'var(--s2)',
+                                                    borderRadius: '8px',
+                                                    border: '1px solid var(--b1)',
+                                                    textAlign: 'center'
+                                                }}>
+                                                    <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--txt3)', marginBottom: '0.35rem' }}>Budget</div>
+                                                    <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--acc2)', fontFamily: "'IBM Plex Mono', monospace" }}>
+                                                        {formatCurrency(order.grossAmount)}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Suggestions */}
+                                            <div style={{
+                                                marginTop: '0.75rem',
+                                                padding: '0.75rem',
+                                                background: 'rgba(108,78,246,0.08)',
+                                                borderRadius: '6px',
+                                                borderLeft: '2px solid var(--acc)'
+                                            }}>
+                                                <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.3rem', color: 'var(--acc)' }}>💡 Create milestones to track deliverables</div>
+                                                <p style={{ fontSize: '0.75rem', color: 'var(--txt2)', margin: 0, lineHeight: 1.4 }}>
+                                                    Break down your project into manageable deliverables for better tracking.
+                                                </p>
+                                            </div>
                                         </div>
                                     )}
                                 </div>

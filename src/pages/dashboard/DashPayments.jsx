@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store';
 import { useFetch } from '../../hooks';
 import { Button, Card, Badge, StatCard, Input, Modal, EmptyState, PageLoader, Alert } from '../../components/common/UI';
-import { formatCurrency, formatDate } from '../../utils/helpers';
+import { formatCurrency, formatDate, formatCompactCurrency } from '../../utils/helpers';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
 import WalletTopup from '../../components/wallet/WalletTopup';
@@ -119,13 +119,19 @@ export default function DashPayments() {
     // Only show transactions for completed orders
     if (txn.order?.status !== 'completed') return false;
 
-    if (isClient && filterType !== 'all') {
-      if (filterType === 'pending') return txn.status === 'pending';
-      if (filterType === 'completed') return txn.status === 'completed';
-    }
-    if (!isClient && filterType !== 'all') {
-      const txnType = isSameId(txn.payee, user) ? 'credit' : 'debit';
-      if (filterType !== txnType) return false;
+    // Apply filter type based on user role
+    if (isClient) {
+      // Client: filter by payment status (pending/released)
+      if (filterType !== 'all') {
+        if (filterType === 'pending' && txn.status !== 'pending') return false;
+        if (filterType === 'released' && txn.status !== 'released') return false;
+      }
+    } else {
+      // Freelancer: filter by transaction type (credit/debit)
+      if (filterType !== 'all') {
+        const txnType = isSameId(txn.payee, user) ? 'credit' : 'debit';
+        if (filterType !== txnType) return false;
+      }
     }
     return true;
   });
@@ -421,12 +427,12 @@ export default function DashPayments() {
 
             <div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.875rem', marginBottom: '1.75rem' }}>
-                <StatCard label="Total Earned" value={formatCurrency(user?.totalGrossEarned || 0)} changeType="up" change="Gross amount" icon="💰" valueColor="var(--acc2)" />
-                <StatCard label="Available" value={formatCurrency(user?.walletBalance || 0)} change="Ready to withdraw" changeType="nt" icon="💳" />
-                <StatCard label="Platform Fee (5%)" value={formatCurrency(user?.totalFeesPaid || 0)} change="Lifetime" changeType="nt" icon="🏛️" />
-                <StatCard label="Net Earnings" value={formatCurrency(user?.totalEarned || 0)} change="After fees" changeType="up" icon="🎯" valueColor="var(--ok)" />
-                <StatCard label="In Escrow" value={formatCurrency(user?.pendingEarnings || 0)} change="Pending release" changeType="nt" icon="🔒" />
-                <StatCard label="Withdrawn" value={formatCurrency(user?.withdrawnTotal || 0)} change="Lifetime" changeType="nt" icon="🏦" />
+                <StatCard label="Total Earned" value={formatCompactCurrency(user?.totalGrossEarned || 0)} changeType="up" change="Gross amount" icon="💰" valueColor="var(--acc2)" />
+                <StatCard label="Available" value={formatCompactCurrency(user?.walletBalance || 0)} change="Ready to withdraw" changeType="nt" icon="💳" />
+                <StatCard label="Platform Fee (5%)" value={formatCompactCurrency(user?.totalFeesPaid || 0)} change="Lifetime" changeType="nt" icon="🏛️" />
+                <StatCard label="Net Earnings" value={formatCompactCurrency(user?.totalEarned || 0)} change="After fees" changeType="up" icon="🎯" valueColor="var(--ok)" />
+                <StatCard label="In Escrow" value={formatCompactCurrency(user?.pendingEarnings || 0)} change="Pending release" changeType="nt" icon="🔒" />
+                <StatCard label="Withdrawn" value={formatCompactCurrency(user?.withdrawnTotal || 0)} change="Lifetime" changeType="nt" icon="🏦" />
               </div>
 
               <Card style={{ marginBottom: '1.75rem', padding: '1.25rem' }}>
@@ -635,10 +641,10 @@ export default function DashPayments() {
           {activeTab === 'overview' && (
             <div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.875rem', marginBottom: '1.75rem' }}>
-                <StatCard label="In Wallet" value={formatCurrency(walletBalance)} change="Available funds" changeType="nt" icon="💳" />
-                <StatCard label="In Escrow" value={formatCurrency(budgetAllocated)} change="Locked in active projects" changeType="nt" icon="🔒" />
-                <StatCard label="Total Spent" value={formatCurrency(totalSpent)} change="On completed projects" changeType="down" icon="💸" valueColor="var(--err)" />
-                <StatCard label="Withdrawn" value={formatCurrency(user?.withdrawnTotal || 0)} change="All time withdrawals" changeType="nt" icon="🏦" />
+                <StatCard label="In Wallet" value={formatCompactCurrency(walletBalance)} change="Available funds" changeType="nt" icon="💳" />
+                <StatCard label="In Escrow" value={formatCompactCurrency(budgetAllocated)} change="Locked in active projects" changeType="nt" icon="🔒" />
+                <StatCard label="Total Spent" value={formatCompactCurrency(totalSpent)} change="On completed projects" changeType="down" icon="💸" valueColor="var(--err)" />
+                <StatCard label="Withdrawn" value={formatCompactCurrency(user?.withdrawnTotal || 0)} change="All time withdrawals" changeType="nt" icon="🏦" />
               </div>
 
               <Card style={{ marginBottom: '1.75rem', padding: '1.25rem' }}>
@@ -683,17 +689,17 @@ export default function DashPayments() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '1.75rem' }}>
                   <div style={{ background: 'linear-gradient(135deg, rgba(0,229,160,0.1) 0%, rgba(108,78,246,0.1) 100%)', padding: '1rem', borderRadius: 12, border: '1px solid rgba(0,229,160,0.2)' }}>
                     <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--txt3)', marginBottom: '0.5rem' }}>Current Balance</div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--acc)' }}>{formatCurrency(walletBalance)}</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--acc)' }}>{formatCompactCurrency(walletBalance)}</div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--txt3)', marginTop: '0.5rem' }}>Available to use</div>
                   </div>
                   <div style={{ background: 'linear-gradient(135deg, rgba(108,78,246,0.1) 0%, rgba(255,180,0,0.1) 100%)', padding: '1rem', borderRadius: 12, border: '1px solid rgba(108,78,246,0.2)' }}>
                     <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--txt3)', marginBottom: '0.5rem' }}>In Escrow</div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--warn)' }}>{formatCurrency(budgetAllocated)}</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--warn)' }}>{formatCompactCurrency(budgetAllocated)}</div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--txt3)', marginTop: '0.5rem' }}>Active projects</div>
                   </div>
                   <div style={{ background: 'linear-gradient(135deg, rgba(255,180,0,0.1) 0%, rgba(255,77,106,0.1) 100%)', padding: '1rem', borderRadius: 12, border: '1px solid rgba(255,180,0,0.2)' }}>
                     <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--txt3)', marginBottom: '0.5rem' }}>Total Spent</div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--err)' }}>-{formatCurrency(totalSpent)}</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--err)' }}>-{formatCompactCurrency(totalSpent)}</div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--txt3)', marginTop: '0.5rem' }}>Completed orders</div>
                   </div>
                 </div>
@@ -761,7 +767,7 @@ export default function DashPayments() {
                     <select value={filterType} onChange={e => setFilterType(e.target.value)} style={{ width: '100%', padding: '0.625rem 0.75rem', border: '1px solid var(--b1)', borderRadius: 8, background: 'var(--s1)', color: 'var(--txt1)', fontSize: '0.875rem' }}>
                       <option value="all">All Payments</option>
                       <option value="pending">Pending</option>
-                      <option value="completed">Completed</option>
+                      <option value="released">Released</option>
                     </select>
                   </div>
                   <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
@@ -813,28 +819,114 @@ export default function DashPayments() {
 
           {/* SPENDING BY PROJECT TAB - CLIENT */}
           {activeTab === 'projects' && (
-            <Card>
-              <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '1rem' }}>🎯 Spending by Project</h4>
+            <div>
               {Object.keys(spendingByProject).length === 0 ? (
-                <EmptyState icon="🎯" title="No projects" description="Payments to projects will appear here" />
+                <Card>
+                  <EmptyState icon="🎯" title="No projects" description="Payments to projects will appear here" />
+                </Card>
               ) : (
-                <div style={{ display: 'grid', gap: '0.75rem' }}>
-                  {Object.entries(spendingByProject).map(([projectId, data]) => (
-                    <div key={projectId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '1rem', background: 'var(--s2)', borderRadius: 10, border: '1px solid var(--b1)' }}>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '0.875rem', fontWeight: 600 }}>{data.name}</div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--txt3)', marginTop: 3 }}>
-                          {data.freelancers.length} freelancer(s)
+                <>
+                  {/* Summary Card */}
+                  <Card style={{ marginBottom: '1.75rem', padding: '1.5rem', background: 'linear-gradient(135deg, rgba(255,77,106,0.05) 0%, rgba(255,180,0,0.05) 100%)' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
+                      <div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--txt3)', marginBottom: '0.5rem' }}>Total Projects</div>
+                        <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--txt)' }}>{Object.keys(spendingByProject).length}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--txt3)', marginBottom: '0.5rem' }}>Total Spent</div>
+                        <div style={{ fontSize: '1.75rem', fontWeight: 800, fontFamily: "'IBM Plex Mono', monospace", color: 'var(--err)' }}>
+                          -{formatCompactCurrency(Object.values(spendingByProject).reduce((sum, p) => sum + p.spent, 0))}
                         </div>
                       </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--err)' }}>-{formatCurrency(data.spent)}</div>
+                      <div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--txt3)', marginBottom: '0.5rem' }}>Active Freelancers</div>
+                        <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--acc)' }}>
+                          {new Set(Object.values(spendingByProject).flatMap(p => p.freelancers)).size}
+                        </div>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </Card>
+
+                  {/* Projects Grid */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+                    {Object.entries(spendingByProject).map(([projectId, data]) => (
+                      <Card key={projectId} style={{
+                        padding: '1.25rem',
+                        background: 'var(--s2)',
+                        border: '1px solid var(--b1)',
+                        transition: 'all 0.3s ease',
+                        cursor: 'pointer',
+                        position: 'relative',
+                        overflow: 'hidden'
+                      }}
+                        onMouseEnter={e => {
+                          e.currentTarget.style.background = 'var(--s1)';
+                          e.currentTarget.style.borderColor = 'var(--err)';
+                          e.currentTarget.style.boxShadow = '0 8px 24px rgba(255,77,106,0.15)';
+                          e.currentTarget.style.transform = 'translateY(-4px)';
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.background = 'var(--s2)';
+                          e.currentTarget.style.borderColor = 'var(--b1)';
+                          e.currentTarget.style.boxShadow = 'none';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                        }}>
+                        {/* Header */}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--txt)', marginBottom: '0.4rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                              {data.name}
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.72rem', color: 'var(--txt3)' }}>
+                              <span>👥</span>
+                              <span>{data.freelancers.length} freelancer{data.freelancers.length !== 1 ? 's' : ''}</span>
+                            </div>
+                          </div>
+                          <div style={{ fontSize: '1.5rem' }}>🎯</div>
+                        </div>
+
+                        {/* Freelancers List */}
+                        <div style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--b1)' }}>
+                          {data.freelancers.slice(0, 3).map((freelancer, idx) => (
+                            <div key={idx} style={{ fontSize: '0.72rem', color: 'var(--txt2)', marginBottom: idx < Math.min(2, data.freelancers.length - 1) ? '0.4rem' : 0, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                              <span style={{ color: 'var(--acc)' }}>•</span>
+                              {freelancer}
+                            </div>
+                          ))}
+                          {data.freelancers.length > 3 && (
+                            <div style={{ fontSize: '0.72rem', color: 'var(--txt3)', marginTop: '0.4rem', fontStyle: 'italic' }}>
+                              +{data.freelancers.length - 3} more
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Amount Section */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                          <div>
+                            <div style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--txt3)', marginBottom: '0.4rem' }}>Amount Spent</div>
+                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '1.35rem', fontWeight: 700, color: 'var(--err)' }}>
+                              -{formatCompactCurrency(data.spent)}
+                            </div>
+                          </div>
+                          <div style={{
+                            padding: '0.5rem 0.75rem',
+                            background: 'rgba(255,77,106,0.1)',
+                            borderRadius: 6,
+                            fontSize: '0.65rem',
+                            fontWeight: 600,
+                            color: 'var(--err)',
+                            textAlign: 'center'
+                          }}>
+                            Completed
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </>
               )}
-            </Card>
+            </div>
           )}
 
           {/* PAYMENT METHODS TAB - CLIENT */}

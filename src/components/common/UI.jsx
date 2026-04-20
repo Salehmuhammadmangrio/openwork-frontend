@@ -193,7 +193,7 @@ export const StatCard = ({ label, value, change, changeType = 'up', icon, valueC
       <div style={{ fontSize: '0.72rem', color: 'var(--txt3)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 500 }}>{label}</div>
       {icon && <span style={{ fontSize: '1rem' }}>{icon}</span>}
     </div>
-    <div style={{ fontFamily: 'Syne, sans-serif', fontSize: '1.65rem', fontWeight: 800, color: valueColor || 'var(--txt)', lineHeight: 1 }}>{value}</div>
+    <div style={{ fontFamily: "'IBM Plex Mono', 'JetBrains Mono', 'Courier New', 'SF Mono', monospace", fontSize: '1.75rem', fontWeight: 700, color: valueColor || 'var(--txt)', lineHeight: 1, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>{value}</div>
     {change && <div style={{ fontSize: '0.72rem', marginTop: '0.45rem', color: changeType === 'up' ? 'var(--ok)' : changeType === 'dn' ? 'var(--err)' : 'var(--txt3)' }}>{change}</div>}
   </div>
 );

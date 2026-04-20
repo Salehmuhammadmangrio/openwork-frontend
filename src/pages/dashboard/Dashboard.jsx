@@ -183,7 +183,7 @@ const Dashboard = () => {
       </aside>
 
       {/* Main Content */}
-      <main style={{ padding: '1.75rem', overflowY: 'auto', minWidth: 0 }}>
+      <main style={{ padding: '1.75rem ', overflowY: 'auto', minWidth: 0 }}>
         <Outlet />
       </main>
     </div>

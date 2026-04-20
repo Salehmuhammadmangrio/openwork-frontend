@@ -103,29 +103,229 @@ export default function DashMyJobs() {
                 <div><h1 style={{ fontSize: '1.4rem', fontWeight: 800 }}>My Posted Jobs</h1><p style={{ color: 'var(--txt2)', fontSize: '0.875rem', marginTop: 3 }}>Manage all your job postings</p></div>
                 <Button variant="primary" size="sm" onClick={() => navigate('/jobs')}>+ Post New Job</Button>
             </div>
-            {loading ? <PageLoader /> : jobs.length === 0 ? <EmptyState icon="💼" title="No jobs posted" description="Post your first job to find talented freelancers" action={<Button variant="primary" size="sm" onClick={() => navigate('/jobs')}>Post a Job</Button>} /> : jobs.map(job => (
-                <div key={job._id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: 'var(--s1)', border: '1px solid var(--b1)', borderRadius: 13, marginBottom: '0.75rem' }}>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '0.9rem', fontWeight: 700 }}>{job.title}</div>
-                        <div style={{ fontSize: '0.72rem', color: 'var(--txt2)', marginTop: 2 }}>{job.category} · {job.proposalCount} proposals · Posted {formatRelative(job.createdAt)}</div>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-                        <Badge color={statusColor(job.status)}>{job.status}</Badge>
-                        <span style={{ fontFamily: 'Space Mono,monospace', fontSize: '0.78rem', fontWeight: 700, color: 'var(--acc2)' }}>${job.budgetMax?.toLocaleString()}</span>
-                        {job.proposalCount > 0 && (
-                            <Button size="xs" variant="primary" onClick={() => navigate(`/dashboard/received-proposals?job=${job._id}`)}>
-                                View {job.proposalCount} Proposals
-                            </Button>
-                        )}
-                        {job.status === 'open' && (
-                            <Button size="xs" variant="secondary" onClick={() => handleEditBudget(job)}>
-                                Edit Budget
-                            </Button>
-                        )}
-                        <Button size="xs" variant="ghost" onClick={() => navigate(`/jobs/${job._id}`)}>View</Button>
-                    </div>
+            {loading ? <PageLoader /> : jobs.length === 0 ? <EmptyState icon="💼" title="No jobs posted" description="Post your first job to find talented freelancers" action={<Button variant="primary" size="sm" onClick={() => navigate('/jobs')}>Post a Job</Button>} /> : (
+                <div style={{ display: 'grid', gap: '1rem' }}>
+                    {jobs.map(job => (
+                        <div key={job._id} style={{
+                            display: 'grid',
+                            gridTemplateColumns: '1fr',
+                            padding: '1.75rem',
+                            // background: 'linear-gradient(135deg, rgba(108, 78, 246, 0.01) 0%, rgba(79, 53, 212, 0.01) 50%, rgba(0, 229, 160, 0.01) 100%)',
+                            backdropFilter: 'blur(20px)',
+                            WebkitBackdropFilter: 'blur(20px)',
+                            border: '1px solid rgba(255, 255, 255, 0.15)',
+                            borderRadius: '16px',
+                            transition: 'all 0.4s cubic-bezier(0.23, 1, 0.320, 1)',
+                            cursor: 'pointer',
+                            // boxShadow: '0 8px 32px rgba(31, 38, 135, 0.15), inset 0 1px 2px rgba(255, 255, 255, 0.1)',
+                            position: 'relative',
+                            boxShadow:'var(--inv-shadow)',
+                            overflow: 'hidden'
+                        }}
+                        onMouseEnter={e => {
+                            // e.currentTarget.style.background = 'linear-gradient(135deg, rgba(108, 78, 246, 0.12) 0%, rgba(79, 53, 212, 0.08) 50%, rgba(0, 229, 160, 0.08) 100%)';
+                            e.currentTarget.style.borderColor = 'rgba(108, 78, 246, 0.4)';
+                            // e.currentTarget.style.boxShadow = '0 16px 48px rgba(108, 78, 246, 0.25), inset 0 1px 2px rgba(255, 255, 255, 0.15)';
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseLeave={e => {
+                            // e.currentTarget.style.background = 'linear-gradient(135deg, rgba(108, 78, 246, 0.08) 0%, rgba(79, 53, 212, 0.04) 50%, rgba(0, 229, 160, 0.04) 100%)';
+                            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+                            // e.currentTarget.style.boxShadow = '0 8px 32px rgba(31, 38, 135, 0.15), inset 0 1px 2px rgba(255, 255, 255, 0.1)';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                        }}>
+                            {/* Header Section */}
+                            <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', gap: '1.5rem', marginBottom: '1.5rem', alignItems: 'start', position: 'relative', zIndex: 1 }}>
+                                {/* Job Icon */}
+                                <div style={{
+                                    width: '60px',
+                                    height: '60px',
+                                    borderRadius: '12px',
+                                    background: 'linear-gradient(135deg, rgba(108, 78, 246, 0.3) 0%, rgba(79, 53, 212, 0.2) 100%)',
+                                    backdropFilter: 'blur(12px)',
+                                    WebkitBackdropFilter: 'blur(12px)',
+                                    border: '1.5px solid rgba(108, 78, 246, 0.3)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '1.8rem',
+                                    boxShadow: 'inset 0 2px 8px rgba(108, 78, 246, 0.15), 0 4px 16px rgba(108, 78, 246, 0.2)'
+                                }}>
+                                    💼
+                                </div>
+
+                                {/* Title & Meta */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                                    <h3 style={{
+                                        fontSize: '1.2rem',
+                                        fontWeight: 700,
+                                        margin: 0,
+                                        color: 'var(--txt)',
+                                        letterSpacing: '-0.5px'
+                                    }}>
+                                        {job.title}
+                                    </h3>
+                                    <div style={{ display: 'flex', gap: '1rem', fontSize: '0.8rem', color: 'var(--txt2)', flexWrap: 'wrap' }}>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>📁 {job.category}</span>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>📅 {job.createdAt ? new Date(job.createdAt).toLocaleDateString() : 'N/A'}</span>
+                                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>⏱️ {job.experienceLevel || 'Intermediate'}</span>
+                                    </div>
+                                </div>
+
+                                {/* Status Badge */}
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+                                    <Badge color={statusColor(job.status)} style={{ fontSize: '0.8rem', backdropFilter: 'blur(8px)', boxShadow: '0 4px 12px rgba(108, 78, 246, 0.15)' }}>
+                                        {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
+                                    </Badge>
+                                    <span style={{ fontSize: '0.65rem', color: 'var(--txt3)' }}>Posted on {job.createdAt ? new Date(job.createdAt).toLocaleDateString() : 'N/A'}</span>
+                                </div>
+                            </div>
+
+                            {/* Description Section */}
+                            {job.description && (
+                                <div style={{
+                                    padding: '1rem',
+                                    background: 'rgba(108, 78, 246, 0.05)',
+                                    backdropFilter: 'blur(10px)',
+                                    border: '1px solid rgba(108, 78, 246, 0.1)',
+                                    borderRadius: '10px',
+                                    marginBottom: '1.5rem',
+                                    position: 'relative',
+                                    zIndex: 1
+                                }}>
+                                    <p style={{ fontSize: '0.8rem', color: 'var(--txt2)', margin: 0, lineHeight: 1.6, maxHeight: '60px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                        {job.description.substring(0, 150)}...
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Stats Grid */}
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                                gap: '1rem',
+                                marginBottom: '1.5rem',
+                                position: 'relative',
+                                zIndex: 1
+                            }}>
+                                {/* Proposals */}
+                                <div style={{
+                                    padding: '0.875rem',
+                                    background: 'linear-gradient(135deg, rgba(0, 229, 160, 0.15) 0%, rgba(0, 200, 140, 0.1) 100%)',
+                                    backdropFilter: 'blur(12px)',
+                                    border: '1px solid rgba(0, 229, 160, 0.2)',
+                                    borderRadius: '10px',
+                                    boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.1)',
+                                    transition: 'all 0.3s ease'
+                                }}>
+                                    <div style={{ fontSize: '0.65rem', color: 'var(--txt3)', fontWeight: 700, marginBottom: '0.3rem', textTransform: 'uppercase' }}>Proposals</div>
+                                    <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--ok)' }}>{job.proposalCount || 0}</div>
+                                </div>
+
+                                {/* Budget */}
+                                <div style={{
+                                    padding: '0.875rem',
+                                    background: 'linear-gradient(135deg, rgba(108, 78, 246, 0.15) 0%, rgba(79, 53, 212, 0.1) 100%)',
+                                    backdropFilter: 'blur(12px)',
+                                    border: '1px solid rgba(108, 78, 246, 0.25)',
+                                    borderRadius: '10px',
+                                    boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.1)',
+                                    transition: 'all 0.3s ease'
+                                }}>
+                                    <div style={{ fontSize: '0.65rem', color: 'var(--txt3)', fontWeight: 700, marginBottom: '0.3rem', textTransform: 'uppercase' }}>Budget</div>
+                                    <div style={{ fontFamily: 'Space Mono,monospace', fontSize: '1.4rem', fontWeight: 800, color: 'var(--acc2)' }}>
+                                        ${job.budgetMax?.toLocaleString() || '0'}
+                                    </div>
+                                </div>
+
+                                {/* Skills Count */}
+                                <div style={{
+                                    padding: '0.875rem',
+                                    background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(230, 170, 0, 0.1) 100%)',
+                                    backdropFilter: 'blur(12px)',
+                                    border: '1px solid rgba(255, 193, 7, 0.2)',
+                                    borderRadius: '10px',
+                                    boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.1)',
+                                    transition: 'all 0.3s ease'
+                                }}>
+                                    <div style={{ fontSize: '0.65rem', color: 'var(--txt3)', fontWeight: 700, marginBottom: '0.3rem', textTransform: 'uppercase' }}>Skills</div>
+                                    <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--warn)' }}>
+                                        {job.skills?.length || 0}
+                                    </div>
+                                </div>
+
+                                {/* Timeline */}
+                                <div style={{
+                                    padding: '0.875rem',
+                                    background: 'linear-gradient(135deg, rgba(156, 39, 176, 0.15) 0%, rgba(123, 31, 162, 0.1) 100%)',
+                                    backdropFilter: 'blur(12px)',
+                                    border: '1px solid rgba(156, 39, 176, 0.2)',
+                                    borderRadius: '10px',
+                                    boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.1)',
+                                    transition: 'all 0.3s ease'
+                                }}>
+                                    <div style={{ fontSize: '0.65rem', color: 'var(--txt3)', fontWeight: 700, marginBottom: '0.3rem', textTransform: 'uppercase' }}>Timeline</div>
+                                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--txt)' }}>
+                                        {job.timeline || 'Not specified'}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Skills Tags */}
+                            {job.skills && job.skills.length > 0 && (
+                                <div style={{ marginBottom: '1.5rem', position: 'relative', zIndex: 1 }}>
+                                    <p style={{ fontSize: '0.7rem', color: 'var(--txt3)', fontWeight: 700, marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Required Skills</p>
+                                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                        {job.skills.slice(0, 5).map((skill, idx) => (
+                                            <span key={idx} style={{
+                                                padding: '0.4rem 0.8rem',
+                                                background: 'rgba(108, 78, 246, 0.12)',
+                                                border: '1px solid rgba(108, 78, 246, 0.2)',
+                                                borderRadius: '6px',
+                                                fontSize: '0.75rem',
+                                                color: 'var(--acc)',
+                                                fontWeight: 600
+                                            }}>
+                                                {skill}
+                                            </span>
+                                        ))}
+                                        {job.skills.length > 5 && (
+                                            <span style={{
+                                                padding: '0.4rem 0.8rem',
+                                                background: 'rgba(108, 78, 246, 0.12)',
+                                                border: '1px solid rgba(108, 78, 246, 0.2)',
+                                                borderRadius: '6px',
+                                                fontSize: '0.75rem',
+                                                color: 'var(--acc)',
+                                                fontWeight: 600
+                                            }}>
+                                                +{job.skills.length - 5} more
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Action Buttons */}
+                            <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'flex-end', flexWrap: 'wrap', position: 'relative', zIndex: 1 }}>
+                                {job.proposalCount > 0 && (
+                                    <Button size="xs" variant="primary" onClick={() => navigate(`/dashboard/received-proposals?job=${job._id}`)}>
+                                        💬 {job.proposalCount} Proposals
+                                    </Button>
+                                )}
+                                {job.status === 'open' && (
+                                    <Button size="xs" variant="secondary" onClick={() => handleEditBudget(job)}>
+                                        ✏️ Edit Budget
+                                    </Button>
+                                )}
+                                <Button size="xs" variant="ghost" onClick={() => navigate(`/jobs/${job._id}`)}>
+                                    👁️ View Full
+                                </Button>
+                            </div>
+                        </div>
+                    ))}
                 </div>
-            ))}
+            )}
 
             {/* Edit Budget Modal */}
             {editModal.isOpen && (
