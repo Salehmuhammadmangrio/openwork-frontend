@@ -59,6 +59,10 @@ import DashMilestones from './pages/dashboard/DashMilestones';
 import DashMyOffers from './pages/dashboard/DashMyOffers';
 import DashMyJobs from './pages/dashboard/DashMyJobs';
 
+// Wallet Pages
+import WalletTopupSuccess from './pages/WalletTopupSuccess';
+import WalletTopupCancel from './pages/WalletTopupCancel';
+
 // AI Assistant
 import AIAssistant from './pages/AIAssistant';
 
@@ -293,6 +297,18 @@ function App() {
             <Route path="reports" element={<AdminReports />} />
             <Route path="logs" element={<AdminLogs />} />
           </Route>
+
+          {/* Wallet Pages */}
+          <Route path="/wallet/topup/success" element={
+            <ProtectedRoute>
+              <WalletTopupSuccess />
+            </ProtectedRoute>
+          } />
+          <Route path="/wallet/topup/cancel" element={
+            <ProtectedRoute>
+              <WalletTopupCancel />
+            </ProtectedRoute>
+          } />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
