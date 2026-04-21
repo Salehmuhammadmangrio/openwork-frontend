@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import '../styles/ai.css';
+import logo from '../assets/openwork.png';
 
 const SUGGESTIONS = ['Write a proposal', 'Pricing advice', 'Skill gap analysis', 'Find matching jobs', 'Profile optimization'];
 
@@ -266,9 +267,8 @@ What specific challenge can I help you solve today?`;
       <div className="ai-assistant-content" style={{ margin: '0 auto', padding: '1rem 1rem' }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <div className="sec-tag">🤖 AI-Powered Career Assistant</div>
+          <div className="sec-tag">AI-Powered Career Assistant</div>
           <h1 className="ai-header-title">OpenWork AI Assistant</h1>
-          <p className="ai-header-desc">Your intelligent career partner for proposals, pricing, skills, and professional guidance.</p>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '1.75rem', alignItems: 'start' }}>
@@ -276,12 +276,11 @@ What specific challenge can I help you solve today?`;
           <div className="ai-chat-container">
             {/* Chat header */}
             <div className="ai-chat-header">
-              <div className="ai-chat-icon">🤖</div>
+              <div className="ai-chat-icon"><img src={logo} alt="OpenWork" style={{ width: '24px', height: '24px' }} /></div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '.9rem', fontWeight: 700, color: 'var(--txt)' }}>OpenWork AI Assistant</div>
-                <div className="ai-chat-status">
-                  <span style={{ width: 6, height: 6, background: 'var(--ok)', borderRadius: '50%', display: 'inline-block', boxShadow: '0 0 8px rgba(0,200,100,0.5)' }} />
-                  Online · Ready to help
+                <div className="ai-chat-status" style={{padding:'0.09rem 0'}}>
+                  Your intelligent career partner for proposals, pricing, skills, and professional guidance.
                 </div>
               </div>
               <Button variant="ghost" size="xs" onClick={clearChat} style={{ color: 'var(--txt2)', transition: 'all 0.2s' }}>Clear Chat</Button>
