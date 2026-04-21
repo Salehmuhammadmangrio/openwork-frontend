@@ -48,7 +48,6 @@ export default function Register() {
             toast.success('Account created! Welcome to OpenWork 🎉');
             // Navigation handled by useEffect watching user
         } catch (err) {
-            console.error('Google registration error:', err);
             toast.error(err.message || 'Google registration failed. Please try again.');
         }
     };
@@ -60,7 +59,6 @@ export default function Register() {
             toast.success('Account created! Welcome to OpenWork 🎉');
             // Navigation handled by useEffect watching user
         } catch (err) {
-            console.error('Facebook registration error:', err);
             toast.error(err.message || 'Facebook registration failed. Please try again.');
         }
     };

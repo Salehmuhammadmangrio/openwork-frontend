@@ -42,7 +42,7 @@ const handleSessionExpiration = () => {
       window.location.href = '/login';
     }, 500);
   } catch (error) {
-    console.error('Error during session expiration logout:', error);
+
     // Force redirect even if error occurs
     window.location.href = '/login';
   }
@@ -69,9 +69,6 @@ api.interceptors.response.use(
     // Session expired or unauthorized (401/403)
     if ((status === 401 || status === 403) && !skipAuthRedirect && hadToken) {
       handleSessionExpiration();
-    } else if (status === 401) {
-      // No token case - silent fail
-      console.warn('Unauthorized request (no token)');
     } else if (status >= 500) {
       toast.error('Server error. Please try again.');
     }

@@ -72,7 +72,6 @@ export default function WalletTopup({ onSuccess, user }) {
       document.body.appendChild(form);
       setTimeout(() => form.submit(), 100);
     } catch (err) {
-      console.error('Payment initiation error:', err);
       toast.error(err.response?.data?.message || 'Failed to initiate payment');
       setLoading(false);
     }

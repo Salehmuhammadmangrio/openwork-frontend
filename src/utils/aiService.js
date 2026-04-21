@@ -18,7 +18,6 @@ export const aiService = {
       }, { meta: { skipAuthRedirect: true } });
       return data;
     } catch (error) {
-      console.error('AI Chat Error:', error);
       throw error;
     }
   },
@@ -31,7 +30,6 @@ export const aiService = {
       const { data } = await api.post(`/ai/proposal/${jobId}`);
       return data;
     } catch (error) {
-      console.error('Proposal Generation Error:', error);
       toast.error('Failed to generate proposal');
       throw error;
     }
@@ -45,7 +43,6 @@ export const aiService = {
       const { data } = await api.get(`/ai/job-match/${jobId}`);
       return data;
     } catch (error) {
-      console.error('Job Match Error:', error);
       throw error;
     }
   },
@@ -60,7 +57,6 @@ export const aiService = {
       });
       return data;
     } catch (error) {
-      console.error('Job Recommendations Error:', error);
       throw error;
     }
   },
@@ -75,7 +71,6 @@ export const aiService = {
       });
       return data;
     } catch (error) {
-      console.error('Skill Test Generation Error:', error);
       toast.error('Failed to generate skill test');
       throw error;
     }
@@ -92,7 +87,6 @@ export const aiService = {
       });
       return data;
     } catch (error) {
-      console.error('Skill Test Evaluation Error:', error);
       toast.error('Failed to evaluate skill test');
       throw error;
     }
@@ -110,7 +104,6 @@ export const aiService = {
       });
       return data;
     } catch (error) {
-      console.error('Fraud Detection Error:', error);
       throw error;
     }
   },
@@ -125,7 +118,6 @@ export const aiService = {
       });
       return data;
     } catch (error) {
-      console.error('Skill Suggestions Error:', error);
       throw error;
     }
   },

@@ -13,7 +13,6 @@ class ErrorBoundary extends React.Component {
   componentDidCatch(error, info) {
     // Keep a console trace for debugging runtime crashes in production builds.
     // eslint-disable-next-line no-console
-    console.error('UI crashed:', error, info);
   }
 
   handleReload = () => {

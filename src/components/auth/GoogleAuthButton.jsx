@@ -27,7 +27,6 @@ const GoogleAuthButton = () => {
       }
     } catch (error) {
       toast.error(error.message || 'Google authentication failed');
-      console.error('Google auth error:', error);
     }
   };
 
@@ -40,7 +39,6 @@ const GoogleAuthButton = () => {
       window.location.href = '/dashboard';
     } catch (error) {
       toast.error(error.response?.data?.message || error.message || 'Signup failed');
-      console.error('Google signup error:', error);
       setShowRoleModal(false);
       setPendingGoogleData(null);
     }

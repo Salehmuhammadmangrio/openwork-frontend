@@ -27,15 +27,9 @@ export default function DashProposals() {
     setError(null);
     try {
       const response = await api.get(`/proposals/my?t=${Date.now()}`);
-      console.log('✓ Proposals loaded successfully:', response.data);
       setData(response.data);
     } catch (error) {
       const errorMsg = error.response?.data?.message || error.message || 'Failed to load proposals. Please try again.';
-      console.error('✗ Error fetching proposals:', {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-      });
       setError(errorMsg);
     } finally {
       setLoading(false);

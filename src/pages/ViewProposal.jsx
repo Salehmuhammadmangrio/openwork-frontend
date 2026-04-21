@@ -29,14 +29,12 @@ export default function ViewProposal() {
   const loadProposal = async () => {
     try {
       const responseData = await api.get(`/proposals/${id}`);
-      console.log('Proposal data:', responseData.data); // Debug log
       const data = responseData.data;
       setProposal(data.proposal);
       setJob(data.proposal.job);
       setFreelancer(data.proposal.freelancer);
       setClient(data.proposal.job?.client);
     } catch (error) {
-      console.error('Error loading proposal:', error);
       toast.error(error.response?.data?.message || 'Proposal not found');
       navigate('/dashboard');
     } finally {

@@ -106,7 +106,6 @@ function App() {
         try {
           await refreshUser();
         } catch (err) {
-          console.log('Token validation failed - session likely expired');
           // The API interceptor and refreshUser will handle logout
         }
       };
@@ -138,7 +137,6 @@ function App() {
 
     // Listen for logout event from server (e.g., admin forced logout)
     socket.on('logout', (data) => {
-      console.log('Received logout event from server:', data);
       // Disconnect socket first, then logout
       disconnectSocket();
       logout();

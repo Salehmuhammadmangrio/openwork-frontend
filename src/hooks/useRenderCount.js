@@ -10,7 +10,6 @@ export const useRenderCount = (componentName) => {
 
   useEffect(() => {
     renderCount.current++;
-    console.log(`[Renders] ${componentName}: ${renderCount.current}`);
   });
 
   return renderCount.current;

@@ -47,7 +47,6 @@ export default function AdminAIRanking() {
           setWeights(data.weights);
         }
       } catch (err) {
-        console.error('Failed to fetch AI weights:', err);
       }
     };
 

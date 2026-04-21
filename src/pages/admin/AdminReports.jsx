@@ -53,7 +53,6 @@ export default function AdminReports() {
             } catch (err) {
                 const errorMsg = err.response?.data?.message || err.message || 'Failed to load reports';
                 setError(errorMsg);
-                console.error('Analytics fetch error:', err);
                 toast.error(errorMsg);
             } finally {
                 setLoading(false);

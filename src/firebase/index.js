@@ -46,10 +46,8 @@ export const signInWithGoogle = async () => {
     } catch (error) {
         // Silently ignore popup close errors from COOP policies
         if (error.code === 'auth/popup-closed-by-user' || error.message?.includes('popup')) {
-            console.log('Popup closed by user');
             throw new Error('Sign in cancelled');
         }
-        console.error('Google sign-in error:', error);
         throw error;
     }
 };
@@ -77,10 +75,8 @@ export const signInWithFacebook = async () => {
     } catch (error) {
         // Silently ignore popup close errors from COOP policies
         if (error.code === 'auth/popup-closed-by-user' || error.message?.includes('popup')) {
-            console.log('Popup closed by user');
             throw new Error('Sign in cancelled');
         }
-        console.error('Facebook sign-in error:', error);
         throw error;
     }
 };
@@ -90,7 +86,6 @@ export const signOut = async () => {
     try {
         await firebaseSignOut(auth);
     } catch (error) {
-        console.error('Sign out error:', error);
         throw error;
     }
 };

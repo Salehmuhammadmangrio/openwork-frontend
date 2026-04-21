@@ -308,7 +308,6 @@ export const Alert = ({ type = 'info', children }) => {
   };
   const s = styles[type] || styles.info; // Fallback to 'info' if type not found
   if (!s) {
-    console.warn(`Alert: Unknown type "${type}", falling back to "info"`);
     return null;
   }
   return (

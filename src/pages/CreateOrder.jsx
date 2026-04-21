@@ -57,11 +57,8 @@ const CreateOrder = () => {
         params: { limit: 100 } // Fetch all clients without search filter
       });
 
-      console.log('Fetched conversation clients:', data.users);
-
       setClients(data.users || []);
     } catch (err) {
-      console.error('Failed to fetch conversation clients:', err);
       setClients([]);
     } finally {
       setLoadingClients(false);
@@ -147,21 +144,25 @@ const CreateOrder = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      <div className="container" style={{ maxWidth: "calc(100% - 2rem)", margin: '0 auto', padding: '2rem 1.5rem' }}>
-        {/* Header */}
-        <Button variant="ghost" size="sm" onClick={() => navigate(-1)} style={{ marginBottom: '2rem' }}>
-          ← Back
-        </Button>
-
-        <div style={{ background: 'var(--s1)', border: '1px solid var(--b1)', borderRadius: 16, padding: '2.5rem' }}>
-          {/* Title Section */}
-          <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '.5rem' }}>
-            Create Order Proposal
-          </h1>
-          <p style={{ color: 'var(--txt2)', marginBottom: '2rem', lineHeight: 1.6 }}>
-            Send a custom order proposal to a client. Once they accept and pay, the order will move to in-progress status.
-          </p>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', }}>
+      <div className="container" style={{ margin: '0 auto', }}>
+        <div style={{ background: 'var(--s1)', boxShadow: 'var(--inv-shadow)', border: '1px solid var(--b1)', borderRadius: 16, padding: '2.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', }}>
+            {/* Title Section */}
+            <div>
+              <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '.5rem' }}>
+                Create Order Proposal
+              </h1>
+              <p style={{ color: 'var(--txt2)', marginBottom: '2rem', lineHeight: 1.6 }}>
+                Send a custom order proposal to a client. Once they accept and pay, the order will move to in-progress status.
+              </p>
+            </div>
+            <Button variant="ghost" size="sm" onClick={
+              () => navigate(-1)} style={{ marginBottom: '2rem' }}
+            >
+              ← Back
+            </Button>
+          </div>
 
           {/* Information Box */}
           <div style={{

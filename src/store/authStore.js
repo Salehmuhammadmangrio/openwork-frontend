@@ -88,20 +88,13 @@ export const useAuthStore = create(
       firebaseRegister: async (idToken, provider) => {
         set({ isLoading: true });
         try {
-          console.log(`[Auth] Registering new user via Firebase ${provider}...`);
           const { data } = await api.post('/auth/firebase-register', { idToken, provider });
-          console.log('[Auth] Firebase registration successful, setting auth state');
           get().setAuth(data.user, data.token);
           localStorage.setItem('ow-token', data.token);
           return data;
         } catch (error) {
           const status = error.response?.status;
           const message = error.response?.data?.message || error.message;
-          
-          console.error(`[Auth] Firebase ${provider} registration failed:`, {
-            status,
-            message,
-          });
           
           // Provide user-friendly error messages
           if (status === 400) {
@@ -123,21 +116,13 @@ export const useAuthStore = create(
       firebaseLogin: async (idToken, provider) => {
         set({ isLoading: true });
         try {
-          console.log(`[Auth] Attempting Firebase ${provider} login...`);
           const { data } = await api.post('/auth/firebase-login', { idToken, provider });
-          console.log('[Auth] Firebase login successful, setting auth state');
           get().setAuth(data.user, data.token);
           localStorage.setItem('ow-token', data.token);
           return data;
         } catch (error) {
           const status = error.response?.status;
           const message = error.response?.data?.message || error.message;
-          
-          console.error(`[Auth] Firebase ${provider} login failed:`, {
-            status,
-            message,
-            code: error.code,
-          });
           
           // Provide user-friendly error messages
           if (status === 400) {
@@ -159,13 +144,10 @@ export const useAuthStore = create(
       googleLogin: async (idToken) => {
         set({ isLoading: true });
         try {
-          console.log('[Auth] Attempting Google login...');
           const { data } = await api.post('/auth/google', { idToken });
-          console.log('[Auth] Google auth response:', data);
 
           // Check if this is a new user requiring role selection
           if (data.requiresRoleSelection && data.googleData) {
-            console.log('[Auth] New user detected - returning role selection data');
             return {
               success: true,
               requiresRoleSelection: true,
@@ -174,12 +156,10 @@ export const useAuthStore = create(
           }
 
           // Existing user - login them
-          console.log('[Auth] Existing user - logging in');
           get().setAuth(data.user, data.token);
           localStorage.setItem('ow-token', data.token);
           return data;
         } catch (error) {
-          console.error('[Auth] Google login failed:', error);
           throw error;
         } finally {
           set({ isLoading: false });
@@ -189,14 +169,11 @@ export const useAuthStore = create(
       googleCompleteSignup: async (idToken, role) => {
         set({ isLoading: true });
         try {
-          console.log(`[Auth] Completing Google signup with role: ${role}`);
           const { data } = await api.post('/auth/google-complete', { idToken, role });
-          console.log('[Auth] Google signup completed successfully');
           get().setAuth(data.user, data.token);
           localStorage.setItem('ow-token', data.token);
           return data;
         } catch (error) {
-          console.error('[Auth] Google signup completion failed:', error);
           throw error;
         } finally {
           set({ isLoading: false });
@@ -220,7 +197,6 @@ export const useAuthStore = create(
           });
         } catch (error) {
 
-          console.warn('Session refresh failed - logging out:', error.response?.status);
           get().logout();
           throw error;
         }

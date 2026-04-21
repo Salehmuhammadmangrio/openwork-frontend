@@ -92,7 +92,6 @@ export default function FakePaymentForm({ amount, orderId, onSuccess }) {
       } catch (backendErr) {
         // Backend endpoint not available - simulate success for demo
         if (backendErr.response?.status === 404 || backendErr.response?.status === 501) {
-          console.log('Backend payment endpoint not available - simulating success for demo');
           toast.success('Payment successful! 🎉 (Demo mode)');
           onSuccess();
           return;

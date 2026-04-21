@@ -199,7 +199,7 @@ export default function DashPayments() {
         toast.error(res.data.message || 'Withdrawal failed');
       }
     } catch (err) {
-      console.error('Withdrawal error:', err);
+      
       toast.error(err.response?.data?.message || 'Withdrawal failed');
     } finally {
       setWdLoading(false);
@@ -245,7 +245,7 @@ export default function DashPayments() {
         toast.error(res.data.message || 'Failed to add bank account');
       }
     } catch (err) {
-      console.error('Bank account error:', err);
+      
       toast.error(err.response?.data?.message || 'Failed to add bank account');
     } finally {
       setPmLoading(false);
@@ -304,7 +304,6 @@ export default function DashPayments() {
         refreshUser();
       }
     } catch (err) {
-      console.error('Card error:', err);
       toast.error(err.response?.data?.message || 'Failed to save card');
     } finally {
       setPmLoading(false);
@@ -413,10 +412,6 @@ export default function DashPayments() {
           </button>
         ))}
       </div>
-
-      {
-        console.log(user)
-      }
 
       {/* ═════════════════════════════════ FREELANCER VIEW ═════════════════════════════════ */}
       {!isClient ? (

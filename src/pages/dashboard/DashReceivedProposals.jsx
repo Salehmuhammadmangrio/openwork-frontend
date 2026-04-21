@@ -65,7 +65,6 @@ export default function DashReceivedProposals() {
           // Set job filter to the specific job
           setJobFilter(specificJobId);
         } catch (err) {
-          console.error(`Error fetching proposals for job ${specificJobId}:`, err);
           toast.error('Failed to load proposals for this job');
         }
       } else {
@@ -76,13 +75,11 @@ export default function DashReceivedProposals() {
             const propsRes = await api.get(`/proposals/job/${job._id}?limit=1000`);
             proposalsData.push(...(propsRes.data.proposals || []));
           } catch (err) {
-            console.error(`Error fetching proposals for job ${job._id}:`, err);
           }
         }
       }
       setReceivedProposals(proposalsData);
     } catch (error) {
-      console.error('Error fetching jobs and proposals:', error);
       toast.error('Failed to load proposals');
     } finally {
       setLoading(false);

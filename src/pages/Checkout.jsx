@@ -56,9 +56,6 @@ export default function Checkout() {
         setOrderId(data.order._id);
         setHasCreatedOrder(true);
       } catch (err) {
-        console.error('Order creation error:', err);
-        console.error('Response data:', err.response?.data);
-        console.error('Error message:', err.response?.data?.message || err.message);
         const errorMsg = err.response?.data?.message || err.message || 'Failed to create order';
         toast.error(errorMsg);
         navigate(-1);

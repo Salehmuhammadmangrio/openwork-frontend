@@ -57,7 +57,6 @@ const Dashboard = () => {
         const { data } = await api.get('/messages/unread-count');
         setUnreadMessages(data.unreadCount || 0);
       } catch (err) {
-        console.error('Failed to fetch unread count:', err);
       }
     };
 
@@ -97,7 +96,6 @@ const Dashboard = () => {
         socket.off('unread:count.updated', handleUnreadCountUpdate);
       };
     } catch (err) {
-      console.error('Socket setup failed, falling back to polling:', err);
       // Fallback: poll every 30 seconds if socket fails
       const interval = setInterval(fetchUnreadCount, 30000);
       return () => clearInterval(interval);

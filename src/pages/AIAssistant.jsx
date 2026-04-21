@@ -107,7 +107,6 @@ export default function AIAssistant() {
         const { data } = await api.get('/jobs', { params: { status: 'open', limit: 50 } });
         setJobs(data.jobs || []);
       } catch (err) {
-        console.error('Failed to fetch jobs:', err);
         setJobs([]);
       } finally {
         setJobsLoading(false);

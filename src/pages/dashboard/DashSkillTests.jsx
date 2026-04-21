@@ -52,7 +52,6 @@ export default function DashSkillTests() {
       const { data } = await api.get('/ai/skill-test/generate', {
         params: { topic: topicKey, level: difficulty }
       });
-      console.log('Generated Test Questions:', JSON.stringify(data));
 
       setTestQuestions(data.questions || []);
       setTestLoaded(true);
@@ -61,7 +60,6 @@ export default function DashSkillTests() {
       setShowResult(false);
       setResult(null);
     } catch (err) {
-      console.error('Failed to generate test:', err);
       toast.error('Failed to load questions. Please try again.');
       setSelectedTopic(null);
     } finally {
@@ -117,7 +115,6 @@ export default function DashSkillTests() {
         toast.success(`Score: ${data.result?.percentage?.toFixed(0)}%. Need 60% to pass.`);
       }
     } catch (err) {
-      console.error('Failed to evaluate test:', err);
       toast.error('Failed to submit test. Please try again.');
     } finally {
       setLoading(false);
