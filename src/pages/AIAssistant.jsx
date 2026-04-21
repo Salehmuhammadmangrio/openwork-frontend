@@ -9,8 +9,6 @@ import remarkGfm from "remark-gfm";
 import '../styles/ai.css';
 import logo from '../assets/openwork.png';
 
-const SUGGESTIONS = ['Write a proposal', 'Pricing advice', 'Skill gap analysis', 'Find matching jobs', 'Profile optimization'];
-
 const getQuickActions = (user, activeRole, availableJobs = []) => {
   const skillsList = user?.skills?.join(', ') || 'full stack';
   const firstName = user?.fullName?.split(' ')[0] || 'there';
@@ -44,22 +42,10 @@ const getQuickActions = (user, activeRole, availableJobs = []) => {
       prompt: `What types of jobs would best suit a ${skillsList} developer with an AI skill score of ${aiScore}${isFreelancer ? ` located in ${location}` : ''}? Which job categories should I target?`
     },
     {
-      key: 'profile',
-      icon: '👤',
-      label: 'Optimize Profile',
-      prompt: `How can I optimize my OpenWork ${isFreelancer ? 'freelancer' : 'client'} profile to attract better opportunities? What are the most important elements to highlight?`
-    },
-    {
       key: 'dispute',
       icon: '⚖️',
       label: 'Dispute Guidance',
       prompt: `A client refuses to approve my deliverables even though I delivered exactly what was specified. What steps should I take to resolve this professionally?`
-    },
-    {
-      key: 'invoice',
-      icon: '🧾',
-      label: 'Invoice Help',
-      prompt: `What should be included in a professional freelancer invoice${isFreelancer ? ` for a client in my region` : ''}? How do I handle taxes and ensure proper documentation?`
     },
     {
       key: 'rate',
@@ -279,7 +265,7 @@ What specific challenge can I help you solve today?`;
               <div className="ai-chat-icon"><img src={logo} alt="OpenWork" style={{ width: '24px', height: '24px' }} /></div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '.9rem', fontWeight: 700, color: 'var(--txt)' }}>OpenWork AI Assistant</div>
-                <div className="ai-chat-status" style={{padding:'0.09rem 0'}}>
+                <div className="ai-chat-status" style={{ padding: '0.09rem 0' }}>
                   Your intelligent career partner for proposals, pricing, skills, and professional guidance.
                 </div>
               </div>
@@ -293,7 +279,12 @@ What specific challenge can I help you solve today?`;
                 <div key={i} className={`ai-msg ${msg.role === 'user' ? 'user' : 'assistant'}`} style={{ animation: 'fadeInUp 0.4s ease' }}>
                   <div className={`ai-bubble ${msg.role === 'user' ? 'ai-bubble-user' : 'ai-bubble-assistant'}`}>
                     <div className="ai-markdown">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]} >
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          p: ({ children }) => <span>{children}</span>,
+                        }}
+                      >
                         {msg.content}
                       </ReactMarkdown>
                     </div>
@@ -354,18 +345,13 @@ What specific challenge can I help you solve today?`;
 
             <div className="ai-sidebar-card">
               <h3 className="ai-sidebar-title">📊 AI Capabilities</h3>
-              {[['Proposal Writing', true], ['Job Matching', true], ['Skill Assessment', true], ['Pricing Intelligence', true], ['Dispute Guidance', true], ['Profile Review', false], ['Invoice Help', true], ['Rate Negotiation', true]].map(([cap, active]) => (
+              {[['Proposal Writing', true], ['Job Matching', true], ['Skill Assessment', true], ['Pricing Intelligence', true], ['Dispute Guidance', true], ['Rate Negotiation', true]].map(([cap, active]) => (
                 <div key={cap} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.75rem', padding: '4px 0', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
                   <span style={{ color: 'var(--txt2)' }}>{cap}</span>
                   <span style={{ color: active ? 'var(--ok)' : 'rgba(255,100,100,0.7)', display: 'flex', alignItems: 'center', gap: '2px' }}>● {active ? 'Active' : 'Offline'}</span>
                 </div>
               ))}
             </div>
-            {/* 
-            <div className="ai-privacy-card">
-              <p className="ai-privacy-text">
-                <strong style={{ color: '#fff
-            </div> */}
 
             <div className="ai-privacy-card">
               <p className="ai-privacy-text">
