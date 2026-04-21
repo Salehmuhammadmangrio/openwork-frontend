@@ -31,6 +31,10 @@ PARAGRAPHS
   overflow-wrap: break-word;
 }
 
+.ai-markdown hr {
+  display: none;
+}
+
 /* =========================
 HEADINGS (FIXED SPACING)
 ========================= */
