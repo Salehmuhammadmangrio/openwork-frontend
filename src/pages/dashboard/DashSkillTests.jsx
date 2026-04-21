@@ -200,8 +200,7 @@ export default function DashSkillTests() {
               </p>
               {result.feedback && <p style={{ fontSize: '0.8rem', color: 'var(--txt3)', marginBottom: '1.25rem', fontStyle: 'italic' }}>{result.feedback}</p>}
               <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-                <Button variant="secondary" size="sm" onClick={() => { setSelectedTopic(null); setTestLoaded(false); }}>Choose Another</Button>
-                {!result.passed && <Button variant="primary" size="sm" onClick={() => startTest(selectedTopic)}>Retry</Button>}
+                <Button variant="primary" size="sm" onClick={() => { setSelectedTopic(null); setShowResult(false); setTestLoaded(false); }} disabled={loading}>Take Another Test</Button>
               </div>
             </div>
           )}
