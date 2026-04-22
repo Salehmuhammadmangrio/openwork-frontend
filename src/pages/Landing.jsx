@@ -2,13 +2,36 @@
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store';
-import { Hero, HowItWorks, Features, Testimonials, CTA, Footer } from '../components/landingpage';
+import aiService from '../utils/aiService';
+import {
+  Hero,
+  HowItWorks,
+  Features,
+  Testimonials,
+  CTA,
+  Footer
+} from '../components/landingpage';
 
 export function Landing() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
 
-  useEffect(() => { if (isAuthenticated) navigate('/dashboard'); }, [isAuthenticated]);
+  useEffect(
+    () => { if (isAuthenticated) navigate('/dashboard'); },
+    [isAuthenticated]
+  );
+
+  useEffect(() => {
+    const checkHealth = async () => {
+      try {
+        const res = await aiService.health();
+        console.log("AI Service Health:", res);
+      } catch (err) {
+        console.error("AI Service Health Check Failed:", err);
+      }
+    };
+    checkHealth();
+  }, []);
 
   const features = [
     { icon: '🧠', title: 'AI Skill Certification', desc: 'Verified scores across 50+ domains. AI scores build trust with clients instantly.' },
@@ -28,9 +51,9 @@ export function Landing() {
   return (
     <div style={{ paddingTop: 64 }}>
       {/* HERO */}
-      <Hero navigate={navigate}/>
+      <Hero navigate={navigate} />
 
-      <HowItWorks/>
+      <HowItWorks />
 
       {/* FEATURES */}
       <Features features={features} />
@@ -39,10 +62,10 @@ export function Landing() {
       <Testimonials testimonials={testimonials} />
 
       {/* CTA */}
-      <CTA navigate={navigate}/>
+      <CTA navigate={navigate} />
 
       {/* FOOTER */}
-      <Footer Link={Link}/>
+      <Footer Link={Link} />
     </div>
   );
 }

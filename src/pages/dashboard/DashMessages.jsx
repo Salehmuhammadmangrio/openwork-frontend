@@ -286,9 +286,6 @@ export default function DashMessages() {
                         </div>
 
                         <div style={{ display: 'flex', gap: 6 }}>
-                            <Button size="xs" variant="ghost" onClick={() => toast.success('Video call')}>
-                                📹
-                            </Button>
                             <Button size="xs" variant="ghost" onClick={() => toast.success('Attach file')}>
                                 📎
                             </Button>

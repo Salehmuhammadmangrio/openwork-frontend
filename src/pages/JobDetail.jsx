@@ -6,6 +6,7 @@ import { Button, Badge, SkillTag, Avatar, EmptyState, PageLoader } from '../comp
 import { formatDate, formatCurrency, getAvatarGradient } from '../utils/helpers';
 import { useAuthStore } from '../store';
 import api from '../utils/api';
+import aiService from '../utils/aiService';
 import toast from 'react-hot-toast';
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
@@ -42,7 +43,7 @@ export default function JobDetail() {
   const handleAIProposal = async () => {
     setAiLoading(true);
     try {
-      const { data } = await api.post(`/ai/proposal/${id}`);
+      const data = await aiService.generateProposal(id);
       setCover(data.proposal?.generatedText || data.proposal || '');
       toast.success('AI proposal ready! ✨');
     } catch { toast.error('AI unavailable'); } finally { setAiLoading(false); }
@@ -53,15 +54,11 @@ export default function JobDetail() {
     if (!bid || !cover.trim()) { toast.error('Please fill all fields'); return; }
     setSubmitting(true);
     try {
-      await api.get(`/proposals/job/${id}`);
-      toast.error('Already applied to this job');
-      return;
-    } catch {
-      await api.post(`/proposals/job/${id}`, { bidAmount: +bid, deliveryTime: delivery, coverLetter: cover });
-      toast.success('Proposal submitted! 📝'); setShowApply(false);
-    } finally { setSubmitting(false); }
-
-    try {
+      const { data } = await api.get(`/proposals/job/${id}/check`);
+      if (data.hasApplied) {
+        toast.error('Already applied to this job');
+        return;
+      }
       await api.post(`/proposals/job/${id}`, { bidAmount: +bid, deliveryTime: delivery, coverLetter: cover });
       toast.success('Proposal submitted! 📝'); setShowApply(false);
     } catch (err) { toast.error(err.response?.data?.message || 'Failed'); }
@@ -97,8 +94,12 @@ export default function JobDetail() {
                 {isAuthenticated && user?.role === 'freelancer' && (
                   <Button variant="primary" size="lg" onClick={async () => {
                     try {
-                      await api.get(`/proposals/job/${id}`);
-                      toast('Already applied to this job');
+                      const { data } = await api.get(`/proposals/job/${id}/check`);
+                      if (data.hasApplied) {
+                        toast('Already applied to this job');
+                      } else {
+                        setShowApply(true);
+                      }
                     } catch {
                       setShowApply(true);
                     }

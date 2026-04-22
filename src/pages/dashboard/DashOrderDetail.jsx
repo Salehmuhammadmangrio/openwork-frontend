@@ -360,7 +360,9 @@ export default function DashOrderDetail() {
               <>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', padding: '5px 0', borderBottom: '1px solid var(--b1)' }}><span style={{ color: 'var(--txt2)' }}>Total</span><span style={{ fontFamily: 'Space Mono,monospace', fontWeight: 700 }}>{formatCurrency(order.grossAmount)}</span></div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', padding: '5px 0', borderBottom: '1px solid var(--b1)' }}><span style={{ color: 'var(--txt2)' }}>Platform Fee</span><span style={{ color: 'var(--err)' }}>-{formatCurrency(order.platformFee)}</span></div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', padding: '10px 0 0', fontWeight: 700 }}><span>Your Earnings</span><span style={{ color: 'var(--ok)', fontFamily: 'Space Mono,monospace' }}>{formatCurrency(order.netAmount)}</span></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', padding: '10px 0 0', fontWeight: 700 }}>
+                  <span>{order.status === 'completed' ? 'You Earning' : 'Total Receive'}</span>
+                  <span style={{ color: 'var(--ok)', fontFamily: 'Space Mono,monospace' }}>{formatCurrency(order.netAmount)}</span></div>
               </>
             )}
 

@@ -66,8 +66,9 @@ export const aiService = {
    */
   async generateSkillTest(topic, level = 'easy') {
     try {
-      const { data } = await api.get('/ai/skill-test/generate', {
-        params: { topic, level },
+      const { data } = await api.post('/ai/skill-test/generate', {
+        topic,
+        level,
       });
       return data;
     } catch (error) {
@@ -113,14 +114,40 @@ export const aiService = {
    */
   async getSkillSuggestions(category = '', query = '') {
     try {
-      const { data } = await api.get('/ai/skill-suggestions', {
-        params: { category, query },
+      const { data } = await api.post('/ai/skill-suggestions', {
+        category,
+        query,
       });
       return data;
     } catch (error) {
       throw error;
     }
   },
+
+  /**
+   * Moderate message
+   */
+  async moderate(message) {
+    try {
+      const { data } = await api.post('/ai/moderate', {
+        message,
+      });
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async health() {
+    try {
+      const { data } = await api.get('/ai/health');
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  }
+  
 };
+
 
 export default aiService;

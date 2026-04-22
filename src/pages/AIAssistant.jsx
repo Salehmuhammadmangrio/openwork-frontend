@@ -3,6 +3,7 @@ import { Button } from '../components/common/UI';
 import { useAuthStore } from '../store';
 import { formatRelative } from '../utils/helpers';
 import api from '../utils/api';
+import aiService from '../utils/aiService';
 import toast from 'react-hot-toast';
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -146,11 +147,7 @@ What would you like to work on today?`,
       const roleMode = activeRole || (canClient ? 'client' : 'freelancer');
       const systemContext = user ? `User: ${user.fullName}, Role: ${roleMode}, Skills: ${user.skills?.join(', ')}, AI Score: ${user.aiSkillScore}, Location: ${user.location}` : '';
 
-      const { data } = await api.post(
-        '/ai/chat',
-        { messages: history, systemContext },
-        { meta: { skipAuthRedirect: true } }
-      );
+      const data = await aiService.chat(history, { userContext: systemContext });
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: data.message, time: new Date()

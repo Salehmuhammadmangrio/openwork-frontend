@@ -93,6 +93,9 @@ function App() {
   // Initialize theme on mount
   useEffect(() => {
     initTheme();
+
+    //health check 
+
   }, []);
 
   // Restore axios token on mount and verify session validity

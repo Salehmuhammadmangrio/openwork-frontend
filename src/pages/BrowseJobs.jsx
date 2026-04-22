@@ -4,6 +4,7 @@ import { Button, Badge, Card, SkillTag, EmptyState, FilterChip, SearchInput } fr
 import { formatDate, debounce } from '../utils/helpers';
 import { useAuthStore } from '../store';
 import api from '../utils/api';
+import aiService from '../utils/aiService';
 import toast from 'react-hot-toast';
 
 const CATEGORIES = ['', 'Web Development', 'Mobile Development', 'UI/UX Design', 'Graphic Design', 'Data Science / AI', 'Content Writing', 'Digital Marketing', 'DevOps & Cloud'];
@@ -21,7 +22,7 @@ function ApplyModal({ job, onClose, onSuccess }) {
   const handleAIWrite = async () => {
     setAiLoading(true);
     try {
-      const { data } = await api.post(`/ai/proposal/${job._id}`);
+      const data = await aiService.generateProposal(job._id);
       setCover(data.proposal?.generatedText || data.proposal || '');
       setIsAIGenerated(true);
       toast.success('AI proposal generated! ✨');
@@ -212,8 +213,12 @@ function JobCard({ job, onApply, onView }) {
             onClick={async (e) => {
               e.stopPropagation();
               try {
-                await api.get(`/proposals/job/${job._id}`);
-                toast.error('You have already submitted a proposal to this job');
+                const { data } = await api.get(`/proposals/job/${job._id}/check`);
+                if (data.hasApplied) {
+                  toast.error('You have already submitted a proposal to this job');
+                } else {
+                  onApply(job);
+                }
               } catch {
                 onApply(job);
               }

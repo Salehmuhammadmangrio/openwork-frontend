@@ -65,7 +65,11 @@ export default function DashReceivedProposals() {
           // Set job filter to the specific job
           setJobFilter(specificJobId);
         } catch (err) {
-          toast.error('Failed to load proposals for this job');
+          if (err.response?.status === 403) {
+            console.error('Not authorized to view proposals for this job');
+          } else {
+            toast.error('Failed to load proposals for this job');
+          }
         }
       } else {
         // Otherwise, fetch proposals for all jobs
@@ -75,6 +79,9 @@ export default function DashReceivedProposals() {
             const propsRes = await api.get(`/proposals/job/${job._id}?limit=1000`);
             proposalsData.push(...(propsRes.data.proposals || []));
           } catch (err) {
+            if (err.response?.status === 403) {
+              console.error(`Not authorized to view proposals for job ${job._id}`);
+            }
           }
         }
       }

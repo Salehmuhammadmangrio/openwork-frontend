@@ -6,6 +6,7 @@ import { useFetch } from '../../hooks';
 import { Button, Card, Badge, ProgressBar } from '../../components/common/UI';
 import { formatDate } from '../../utils/helpers';
 import api from '../../utils/api';
+import aiService from '../../utils/aiService';
 import toast from 'react-hot-toast';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, RadialLinearScale, Title, Tooltip, Legend, Filler);
@@ -21,8 +22,8 @@ const CD = {
 
 
 const SKILL_TOPICS = [
-  { key: 'mobiledevelopment', name: 'Mobile Development', icon: '📱', pts: 8 },
-  { key: 'pythonML', name: 'Python & ML', icon: '🐍', pts: 10 },
+  { key: 'mobile development', name: 'Mobile Development', icon: '📱', pts: 8 },
+  { key: 'Python and Machine Learning', name: 'Python & ML', icon: '🐍', pts: 10 },
   { key: 'nodejs', name: 'Node.js & Express', icon: '🌐', pts: 8 },
   { key: 'javascript', name: 'JavaScript ES6+', icon: '📜', pts: 7 },
   { key: 'typescript', name: 'TypeScript Advanced', icon: '📘', pts: 9 },
@@ -49,9 +50,7 @@ export default function DashSkillTests() {
     setSelectedTopic(topicKey);
     setLoading(true);
     try {
-      const { data } = await api.get('/ai/skill-test/generate', {
-        params: { topic: topicKey, level: difficulty }
-      });
+      const data = await aiService.generateSkillTest(topicKey, difficulty);
 
       setTestQuestions(data.questions || []);
       setTestLoaded(true);
@@ -60,7 +59,7 @@ export default function DashSkillTests() {
       setShowResult(false);
       setResult(null);
     } catch (err) {
-      toast.error('Failed to load questions. Please try again.');
+      // toast.error('Failed to load questions. Please try again.');
       setSelectedTopic(null);
     } finally {
       setLoading(false);
@@ -95,14 +94,11 @@ export default function DashSkillTests() {
         return null;
       });
 
-      const { data } = await api.post('/ai/skill-test/evaluate', {
-        topic: topicData?.name || selectedTopic,
-        questions: testQuestions.map((q, idx) => ({
-          question: q.question,
-          correct_answer: q.correct_answer,
-          user_answer: formattedAnswers[idx]
-        }))
-      });
+      const data = await aiService.evaluateSkillTest(topicData?.name || selectedTopic, testQuestions.map((q, idx) => ({
+        question: q.question,
+        correct_answer: q.correct_answer,
+        user_answer: formattedAnswers[idx]
+      })));
 
       setResult(data.result);
       setShowResult(true);
