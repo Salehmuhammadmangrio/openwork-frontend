@@ -15,7 +15,7 @@ let isRedirecting = false;
  * Clears all auth-related data from localStorage and state
  */
 const handleSessionExpiration = () => {
-  if (isRedirecting) return; // Prevent multiple redirects
+  if (isRedirecting) return;
   isRedirecting = true;
 
   try {

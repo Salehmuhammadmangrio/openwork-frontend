@@ -45,10 +45,14 @@ export default function DashOverview() {
   const resendVerification = async () => {
     setResending(true);
     try {
-      await api.post('/auth/resend-verification');
-      toast.success('Verification email sent! Check your inbox.');
-    } catch {
-      toast.error('Failed to send email.');
+      const response = await api.post('/auth/resend-verification');
+      toast.success('OTP sent to your email! Redirecting...');
+      setTimeout(() => {
+        navigate('/verify-email');
+      }, 500);
+    } catch (err) {
+      const message = err.response?.data?.message || 'Failed to send OTP.';
+      toast.error(message);
     } finally {
       setResending(false);
     }

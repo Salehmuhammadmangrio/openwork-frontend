@@ -13,7 +13,6 @@ const AuthWrap = ({ children }) => (
 
 export default function Login() {
     const navigate = useNavigate();
-    // Use selective subscription - only subscribe to needed fields
     const login = useAuthStore(s => s.login);
     const firebaseLogin = useAuthStore(s => s.firebaseLogin);
     const isLoading = useAuthStore(s => s.isLoading);

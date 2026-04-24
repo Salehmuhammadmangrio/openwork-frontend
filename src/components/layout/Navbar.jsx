@@ -5,6 +5,7 @@ import { useOutsideClick } from '../../hooks';
 import { Avatar } from '../common/UI';
 import { formatRelative } from '../../utils/helpers';
 import toast from 'react-hot-toast';
+import RoleSwitcher from '../auth/RoleSwitcher';
 
 // Add animation styles
 const animationStyle = document.createElement('style');
@@ -58,17 +59,19 @@ const Navbar = () => {
     }
   }, [theme]);
 
-  const navLinks = user?.role === 'admin' 
+  // useEffect(() => {}, [switchRole])
+
+  const navLinks = user?.role === 'admin'
     ? [{ to: '/admin', label: 'Admin' }]
     : [
-        ...(user?.role !== 'freelancer' ? [{ to: '/freelancers', label: 'Find Talent' }] : []),
-        { to: '/jobs', label: 'Browse Jobs' },
-        ...(user?.role === 'freelancer' ? [{ to: '/dashboard/proposals', label: 'My Proposals' }] : []),
-        ...(user?.role === 'freelancer' ? [{ to: '/dashboard/my-offers', label: 'My Offers' }] : []),
-        { to: '/offers', label: 'Open Offers' },
-        ...(user ? [{ to: '/dashboard/ai', label: '🤖 AI Assistant' }] : []),
-        ...(user?.role === 'client' ? [{ to: '/dashboard/my-jobs', label: 'My Jobs' }] : []),
-      ].filter(Boolean);
+      ...(user?.role !== 'freelancer' ? [{ to: '/freelancers', label: 'Find Talent' }] : []),
+      { to: '/jobs', label: 'Browse Jobs' },
+      ...(user?.role === 'freelancer' ? [{ to: '/dashboard/proposals', label: 'My Proposals' }] : []),
+      ...(user?.role === 'freelancer' ? [{ to: '/dashboard/my-offers', label: 'My Offers' }] : []),
+      { to: '/offers', label: 'Open Offers' },
+      ...(user ? [{ to: '/dashboard/ai', label: '🤖 AI Assistant' }] : []),
+      ...(user?.role === 'client' ? [{ to: '/dashboard/my-jobs', label: 'My Jobs' }] : []),
+    ].filter(Boolean);
 
 
   const handleLogout = () => {
@@ -146,8 +149,10 @@ const Navbar = () => {
           {theme === 'dark' ? '☀️' : '🌙'}
         </button>
 
+
         {isAuthenticated ? (
           <>
+            <RoleSwitcher />
             {/* Notification Bell */}
             <div ref={notifRef} style={{ position: 'relative' }}>
               <button

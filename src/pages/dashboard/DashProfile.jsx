@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 
 export default function DashProfile() {
   const { user, updateUser, activeRole } = useAuthStore();
+  const [profileType, setProfileType] = useState(activeRole || 'freelancer'); // Track which profile we're editing
   const { values, handleChange, setValues } = useForm({
     fullName: user?.fullName || '', title: user?.title || '',
     email: user?.email || '', phone: user?.phone || '',
@@ -27,6 +28,7 @@ export default function DashProfile() {
   const [editingEdu, setEditingEdu] = useState(null);
   const fileRef = useRef();
   const canClient = user?.role === 'client' || user?.canActAsClient;
+  const canFreelancer = user?.role === 'freelancer' || user?.canActAsFreelancer || user?.role === 'admin';
   const roleMode = activeRole || (canClient ? 'client' : 'freelancer');
 
   useEffect(() => {
@@ -137,6 +139,68 @@ export default function DashProfile() {
         <Button variant="primary" size="sm" loading={saving} onClick={saveProfile}>Save Changes</Button>
       </div>
 
+      {/* Profile Type Selector - Only show for dual-role users */}
+      {canClient && canFreelancer && (
+        <Card style={{ marginBottom: '1.5rem', padding: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'space-between' }}>
+            <div>
+              <h3 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.5rem' }}>📋 Choose Profile Type</h3>
+              <p style={{ fontSize: '0.8rem', color: 'var(--txt3)', margin: 0 }}>Edit your Freelancer or Client profile separately</p>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                onClick={() => setProfileType('freelancer')}
+                style={{
+                  padding: '0.7rem 1.2rem',
+                  borderRadius: 10,
+                  border: `2px solid ${profileType === 'freelancer' ? 'var(--acc)' : 'var(--b1)'}`,
+                  background: profileType === 'freelancer' ? 'rgba(108,78,246,.15)' : 'transparent',
+                  color: profileType === 'freelancer' ? 'var(--acc)' : 'var(--txt2)',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  if (profileType !== 'freelancer') {
+                    e.target.style.background = 'var(--s1)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = profileType === 'freelancer' ? 'rgba(108,78,246,.15)' : 'transparent';
+                }}
+              >
+                💼 Freelancer Profile
+              </button>
+              <button
+                onClick={() => setProfileType('client')}
+                style={{
+                  padding: '0.7rem 1.2rem',
+                  borderRadius: 10,
+                  border: `2px solid ${profileType === 'client' ? 'var(--acc)' : 'var(--b1)'}`,
+                  background: profileType === 'client' ? 'rgba(34,197,94,.15)' : 'transparent',
+                  color: profileType === 'client' ? 'var(--ok)' : 'var(--txt2)',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  if (profileType !== 'client') {
+                    e.target.style.background = 'var(--s1)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = profileType === 'client' ? 'rgba(34,197,94,.15)' : 'transparent';
+                }}
+              >
+                🏢 Client Profile
+              </button>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Banner + Avatar */}
       <div style={{ position: 'relative', marginBottom: '3rem' }}>
         <div style={{ height: 150, background: 'linear-gradient(135deg,rgba(108,78,246,.3),rgba(0,229,195,.18))', borderRadius: '16px 16px 0 0' }} />
@@ -152,13 +216,13 @@ export default function DashProfile() {
       <div style={{ background: 'var(--s1)', border: '1px solid var(--b1)', borderRadius: '0 0 16px 16px', padding: '3.5rem 1.75rem 1.75rem', marginBottom: '1.25rem' }}>
         <div style={{ display: 'flex', gap: 7, marginBottom: '1rem', flexWrap: 'wrap' }}>
           {user?.isVerified && <Badge color="ok">✓ Email Verified</Badge>}
-          <Badge color="info">{roleMode === 'client' ? '🏢 Client' : '🧑‍💻 Freelancer'}</Badge>
+          <Badge color={profileType === 'client' ? 'info' : 'primary'}>{profileType === 'client' ? '🏢 Editing Client Profile' : '🧑‍💻 Editing Freelancer Profile'}</Badge>
           {user?.certifications?.some(c => c.passed) && <Badge color="teal">🤖 AI Certified</Badge>}
         </div>
       </div>
 
-      {/* Professional Stats */}
-      {(roleMode === 'freelancer' || user?.role === 'freelancer') && (
+      {/* Professional Stats - Freelancer Only */}
+      {profileType === 'freelancer' && (
         <Card style={{ marginBottom: '1.25rem', padding: '1.5rem' }}>
           <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '1rem' }}>📊 Professional Stats</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
@@ -200,96 +264,103 @@ export default function DashProfile() {
         <Textarea label="Bio" name="bio" value={values.bio} onChange={handleChange} placeholder="Tell clients about yourself..." rows={3} />
       </Card>
 
-      {/* Professional Details */}
-      <Card style={{ marginBottom: '1.25rem', padding: '1.75rem' }}>
-        <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '1rem' }}>💼 Professional Details</h3>
-        <div className="grid-2">
-          <Input label="Hourly Rate ($)" type="number" name="hourlyRate" value={values.hourlyRate} onChange={handleChange} />
-          <Select label="Experience Level" name="experienceLevel" value={values.experienceLevel} onChange={handleChange}>
-            <option value="junior">Junior (0-2 years)</option>
-            <option value="mid">Mid (2-5 years)</option>
-            <option value="senior">Senior (5+ years)</option>
-            <option value="expert">Expert (10+ years)</option>
-          </Select>
-        </div>
-        <Input label="Skills (comma separated)" name="skills" value={values.skills} onChange={handleChange} placeholder="React, Node.js, MongoDB, Python..." />
-        <Input label="Languages (comma separated)" name="languages" value={values.languages} onChange={handleChange} placeholder="English, Spanish, French..." />
-        <Input label="Portfolio URL" type="url" name="portfolioUrl" value={values.portfolioUrl} onChange={handleChange} placeholder="https://yourportfolio.dev" />
-      </Card>
+      {/* Professional Details - Freelancer Specific */}
+      {profileType === 'freelancer' && (
+        <Card style={{ marginBottom: '1.25rem', padding: '1.75rem' }}>
+          <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '1rem' }}>💼 Professional Details</h3>
+          <div className="grid-2">
+            <Input label="Hourly Rate ($)" type="number" name="hourlyRate" value={values.hourlyRate} onChange={handleChange} />
+            <Select label="Experience Level" name="experienceLevel" value={values.experienceLevel} onChange={handleChange}>
+              <option value="junior">Junior (0-2 years)</option>
+              <option value="mid">Mid (2-5 years)</option>
+              <option value="senior">Senior (5+ years)</option>
+              <option value="expert">Expert (10+ years)</option>
+            </Select>
+          </div>
+          <Input label="Skills (comma separated)" name="skills" value={values.skills} onChange={handleChange} placeholder="React, Node.js, MongoDB, Python..." />
+          <Input label="Languages (comma separated)" name="languages" value={values.languages} onChange={handleChange} placeholder="English, Spanish, French..." />
+          <Input label="Portfolio URL" type="url" name="portfolioUrl" value={values.portfolioUrl} onChange={handleChange} placeholder="https://yourportfolio.dev" />
+        </Card>
+      )}
 
-      {/* Client-specific fields */}
-      {canClient && (
+      {/* Company Information - Client Specific */}
+      {profileType === 'client' && (
         <Card style={{ marginBottom: '1.25rem', padding: '1.75rem' }}>
           <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '1rem' }}>🏢 Company Information</h3>
           <div className="grid-2">
             <Input label="Company Name" name="companyName" value={values.companyName} onChange={handleChange} />
             <Input label="Company Size" name="companySize" value={values.companySize} onChange={handleChange} placeholder="1-10, 11-50, etc." />
           </div>
+          <Textarea label="Company Bio" name="bio" value={values.bio} onChange={handleChange} placeholder="Tell clients about your company..." rows={3} />
         </Card>
       )}
 
-      {/* Work History */}
-      <Card style={{ marginBottom: '1.25rem', padding: '1.75rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 700 }}>💼 Work History</h3>
-          <Button size="xs" variant="primary" onClick={addWorkEntry}>+ Add</Button>
-        </div>
-        {workHistory.length === 0 ? (
-          <p style={{ color: 'var(--txt3)', fontSize: '0.875rem' }}>No work history yet</p>
-        ) : (
-          <div style={{ display: 'grid', gap: '0.75rem' }}>
-            {workHistory.map((work, idx) => (
-              <div key={work._id} style={{ background: 'var(--s2)', borderRadius: 10, padding: '1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                  <div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{work.position}</div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--txt2)' }}>{work.company}</div>
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <Button size="xs" variant="ghost" onClick={() => { setEditingWork(work); setWorkModal(true); }}>✏️</Button>
-                    <Button size="xs" variant="ghost" onClick={() => deleteWorkEntry(work._id)}>🗑️</Button>
-                  </div>
-                </div>
-                {work.startDate && <div style={{ fontSize: '0.75rem', color: 'var(--txt3)' }}>{work.startDate}{work.endDate ? ` - ${work.endDate}` : ' - Present'}</div>}
-                {work.description && <div style={{ fontSize: '0.8rem', color: 'var(--txt2)', marginTop: '0.5rem' }}>{work.description}</div>}
-              </div>
-            ))}
+      {/* Work History - Freelancer Only */}
+      {profileType === 'freelancer' && (
+        <Card style={{ marginBottom: '1.25rem', padding: '1.75rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3 style={{ fontSize: '0.95rem', fontWeight: 700 }}>💼 Work History</h3>
+            <Button size="xs" variant="primary" onClick={addWorkEntry}>+ Add</Button>
           </div>
-        )}
-      </Card>
-
-      {/* Education */}
-      <Card style={{ marginBottom: '1.25rem', padding: '1.75rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 700 }}>🎓 Education</h3>
-          <Button size="xs" variant="primary" onClick={addEduEntry}>+ Add</Button>
-        </div>
-        {education.length === 0 ? (
-          <p style={{ color: 'var(--txt3)', fontSize: '0.875rem' }}>No education info yet</p>
-        ) : (
-          <div style={{ display: 'grid', gap: '0.75rem' }}>
-            {education.map((edu) => (
-              <div key={edu._id} style={{ background: 'var(--s2)', borderRadius: 10, padding: '1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                  <div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{edu.degree}{edu.field ? ` in ${edu.field}` : ''}</div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--txt2)' }}>{edu.school}</div>
+          {workHistory.length === 0 ? (
+            <p style={{ color: 'var(--txt3)', fontSize: '0.875rem' }}>No work history yet</p>
+          ) : (
+            <div style={{ display: 'grid', gap: '0.75rem' }}>
+              {workHistory.map((work, idx) => (
+                <div key={work._id} style={{ background: 'var(--s2)', borderRadius: 10, padding: '1rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                    <div>
+                      <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{work.position}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--txt2)' }}>{work.company}</div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <Button size="xs" variant="ghost" onClick={() => { setEditingWork(work); setWorkModal(true); }}>✏️</Button>
+                      <Button size="xs" variant="ghost" onClick={() => deleteWorkEntry(work._id)}>🗑️</Button>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <Button size="xs" variant="ghost" onClick={() => { setEditingEdu(edu); setEduModal(true); }}>✏️</Button>
-                    <Button size="xs" variant="ghost" onClick={() => deleteEduEntry(edu._id)}>🗑️</Button>
-                  </div>
+                  {work.startDate && <div style={{ fontSize: '0.75rem', color: 'var(--txt3)' }}>{work.startDate}{work.endDate ? ` - ${work.endDate}` : ' - Present'}</div>}
+                  {work.description && <div style={{ fontSize: '0.8rem', color: 'var(--txt2)', marginTop: '0.5rem' }}>{work.description}</div>}
                 </div>
-                {edu.graduationYear && <div style={{ fontSize: '0.75rem', color: 'var(--txt3)' }}>Graduated {edu.graduationYear}</div>}
-                {edu.description && <div style={{ fontSize: '0.8rem', color: 'var(--txt2)', marginTop: '0.5rem' }}>{edu.description}</div>}
-              </div>
-            ))}
-          </div>
-        )}
-      </Card>
+              ))}
+            </div>
+          )}
+        </Card>
+      )}
 
-      {/* Certifications */}
-      {certifications.length > 0 && (
+      {/* Education - Freelancer Only */}
+      {profileType === 'freelancer' && (
+        <Card style={{ marginBottom: '1.25rem', padding: '1.75rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3 style={{ fontSize: '0.95rem', fontWeight: 700 }}>🎓 Education</h3>
+            <Button size="xs" variant="primary" onClick={addEduEntry}>+ Add</Button>
+          </div>
+          {education.length === 0 ? (
+            <p style={{ color: 'var(--txt3)', fontSize: '0.875rem' }}>No education info yet</p>
+          ) : (
+            <div style={{ display: 'grid', gap: '0.75rem' }}>
+              {education.map((edu) => (
+                <div key={edu._id} style={{ background: 'var(--s2)', borderRadius: 10, padding: '1rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                    <div>
+                      <div style={{ fontSize: '0.9rem', fontWeight: 600 }}>{edu.degree}{edu.field ? ` in ${edu.field}` : ''}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--txt2)' }}>{edu.school}</div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <Button size="xs" variant="ghost" onClick={() => { setEditingEdu(edu); setEduModal(true); }}>✏️</Button>
+                      <Button size="xs" variant="ghost" onClick={() => deleteEduEntry(edu._id)}>🗑️</Button>
+                    </div>
+                  </div>
+                  {edu.graduationYear && <div style={{ fontSize: '0.75rem', color: 'var(--txt3)' }}>Graduated {edu.graduationYear}</div>}
+                  {edu.description && <div style={{ fontSize: '0.8rem', color: 'var(--txt2)', marginTop: '0.5rem' }}>{edu.description}</div>}
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* Certifications - Freelancer Only */}
+      {profileType === 'freelancer' && certifications.length > 0 && (
         <Card style={{ marginBottom: '1.25rem', padding: '1.75rem' }}>
           <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '1rem' }}>🏆 Certifications & Skills Tests</h3>
           <div style={{ display: 'grid', gap: '0.75rem' }}>
@@ -395,4 +466,3 @@ export default function DashProfile() {
     </div>
   );
 }
-  

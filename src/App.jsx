@@ -181,7 +181,8 @@ function App() {
 
         <Routes >
           {/* Public */}
-          <Route path="/" element={<AdminRedirectRoute><Navbar /><Landing /></AdminRedirectRoute>} />
+          <Route path="/" element={
+            <AdminRedirectRoute><Navbar /><Landing /></AdminRedirectRoute>} />
           <Route path="/about" element={<AdminRedirectRoute><Navbar /><AboutUs /></AdminRedirectRoute>} />
           <Route path="/careers" element={<AdminRedirectRoute><Navbar /><Careers /></AdminRedirectRoute>} />
           <Route path="/blog" element={<AdminRedirectRoute><Navbar /><Blog /></AdminRedirectRoute>} />
@@ -192,7 +193,7 @@ function App() {
           <Route path="/register" element={<AdminRedirectRoute><Navbar /><Register /></AdminRedirectRoute>} />
           <Route path="/forgot-password" element={<AdminRedirectRoute><Navbar /><ForgotPassword /></AdminRedirectRoute>} />
           <Route path="/reset-password/:token" element={<AdminRedirectRoute><Navbar /><ResetPassword /></AdminRedirectRoute>} />
-          <Route path="/verify-email/:token" element={<AdminRedirectRoute><Navbar /><VerifyEmail /></AdminRedirectRoute>} />
+          <Route path="/verify-email" element={<AdminRedirectRoute><ProtectedRoute><Navbar /><VerifyEmail /></ProtectedRoute></AdminRedirectRoute>} />
 
           {/* Browse (public with optional auth) */}
           <Route path="/freelancers" element={<AdminRedirectRoute><Navbar /><BrowseFreelancers /></AdminRedirectRoute>} />

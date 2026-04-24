@@ -9,8 +9,14 @@ export default function DashSettings() {
   const { user, updateUser } = useAuthStore();
   const [tfa, setTfa] = useState(user?.twoFactorEnabled || false);
   const [prefs, setPrefs] = useState(user?.notifPrefs || { messages: true, jobMatches: true, payments: true, disputes: true, marketing: false });
+  const [dualRoleLoading, setDualRoleLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const { values, handleChange, setValues } = useForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+
+  // Check if user can have dual roles
+  const canBeFreelancer = user?.role === 'freelancer' || user?.canActAsFreelancer;
+  const canBeClient = user?.role === 'client' || user?.canActAsClient;
+  const dualRoleEnabled = canBeFreelancer && canBeClient;
 
   const savePassword = async () => {
     if (values.newPassword !== values.confirmPassword) { toast.error('Passwords do not match'); return; }
@@ -18,12 +24,35 @@ export default function DashSettings() {
     try {
       await api.put('/auth/update-password', { currentPassword: values.currentPassword, newPassword: values.newPassword });
       toast.success('Password updated!');
+      setValues({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err) { toast.error(err.response?.data?.message || 'Error'); }
     finally { setSaving(false); }
   };
 
   const savePrefs = async () => {
     try { await api.put('/users/profile', { notifPrefs: prefs }); toast.success('Preferences saved!'); } catch { }
+  };
+
+  const toggleDualRole = async () => {
+    if (user?.role === 'admin') {
+      toast.error('Admin users cannot change role capabilities');
+      return;
+    }
+
+    setDualRoleLoading(true);
+    try {
+      const { data } = await api.put('/users/toggle-dual-role', {
+        canActAsFreelancer: !dualRoleEnabled,
+      });
+      
+      // Update local user state
+      updateUser(data.user);
+      toast.success(data.message);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update role settings');
+    } finally {
+      setDualRoleLoading(false);
+    }
   };
 
   return (
@@ -51,12 +80,39 @@ export default function DashSettings() {
 
       <Card>
         <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem' }}>🎭 Dual Role Settings</h3>
-        <p style={{ fontSize: '0.845rem', color: 'var(--txt2)', marginBottom: '1rem' }}>Work as both a Freelancer and a Client.</p>
-        <div className="grid-2">
-          {['🧑‍💻 Freelancer Mode', '🏢 Client Mode'].map((r, i) => (
-            <button key={i} onClick={() => toast.success(`${r} toggled`)} style={{ padding: '0.875rem', borderRadius: 11, background: i === 0 ? 'rgba(108,78,246,.1)' : 'var(--s2)', border: `1px solid ${i === 0 ? 'var(--acc)' : 'var(--b1)'}`, color: i === 0 ? '#A78BFA' : 'var(--txt2)', cursor: 'pointer', fontSize: '0.845rem', fontWeight: 600 }}>{r}</button>
-          ))}
-        </div>
+        <p style={{ fontSize: '0.845rem', color: 'var(--txt2)', marginBottom: '1rem' }}>
+          {dualRoleEnabled 
+            ? 'You can work as both a Freelancer and a Client. Use the role switcher in the navbar to toggle between roles.'
+            : 'Enable dual role to work as both a Freelancer and Client.'}
+        </p>
+        
+        {user?.role === 'admin' ? (
+          <div style={{ padding: '0.875rem', borderRadius: 11, background: 'rgba(255, 77, 106, 0.1)', border: '1px solid rgba(255, 77, 106, 0.3)', color: 'var(--err)', fontSize: '0.845rem' }}>
+            Admin users cannot change role capabilities
+          </div>
+        ) : (
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 600, fontSize: '0.9rem', marginBottom: '0.25rem' }}>
+                {dualRoleEnabled ? '✓ Dual Role Enabled' : 'Dual Role Disabled'}
+              </div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--txt3)' }}>
+                {dualRoleEnabled 
+                  ? 'You can switch between freelancer and client roles'
+                  : 'Enable dual role to access both freelancer and client features'}
+              </div>
+            </div>
+            <Button 
+              variant={dualRoleEnabled ? 'danger' : 'primary'} 
+              size="sm" 
+              loading={dualRoleLoading}
+              onClick={toggleDualRole}
+              style={{ whiteSpace: 'nowrap' }}
+            >
+              {dualRoleEnabled ? 'Disable' : 'Enable'}
+            </Button>
+          </div>
+        )}
       </Card>
 
       <Card style={{ borderColor: 'rgba(255,77,106,.2)', padding: '1.75rem' }}>

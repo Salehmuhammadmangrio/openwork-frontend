@@ -39,11 +39,44 @@ export const useAuthStore = create(
         }
       },
 
-      // SDS-compatible helper: switches between client/freelancer when dual-role is available.
-      toggleRole: () => {
-        const { activeRole } = get();
-        const next = activeRole === 'client' ? 'freelancer' : 'client';
-        get().setActiveRole(next);
+      toggleRole: async () => {
+        const user = get().user;
+        if (!user) return;
+
+        const canClient = user.role === 'client' || user.canActAsClient;
+        const canFreelancer =
+          user.role === 'freelancer' ||
+          user.canActAsFreelancer ||
+          user.role === 'admin';
+
+        const allowed = [
+          ...(canClient ? ['client'] : []),
+          ...(canFreelancer ? ['freelancer'] : []),
+        ];
+
+        // Admin cannot switch roles
+        if (user.role === 'admin') return;
+
+        // Only dual-role users can switch
+        if (allowed.length < 2) return;
+
+        set({ isLoading: true });
+
+        try {
+          const { data } = await api.put('/users/role-switch');
+
+          set((state) => ({
+            user: {
+              ...state.user,
+              role: data.role,
+            },
+            activeRole: data.role,
+          }));
+
+          return data;
+        } finally {
+          set({ isLoading: false });
+        }
       },
 
       updateUser: (updates) => set((s) => ({ user: { ...s.user, ...updates } })),
@@ -95,7 +128,7 @@ export const useAuthStore = create(
         } catch (error) {
           const status = error.response?.status;
           const message = error.response?.data?.message || error.message;
-          
+
           // Provide user-friendly error messages
           if (status === 400) {
             throw new Error('Missing or invalid authentication data. Please try again.');
@@ -106,7 +139,7 @@ export const useAuthStore = create(
           } else if (error.code === 'ECONNABORTED') {
             throw new Error('Registration request timed out. Please check your connection and try again.');
           }
-          
+
           throw error;
         } finally {
           set({ isLoading: false });
@@ -123,7 +156,7 @@ export const useAuthStore = create(
         } catch (error) {
           const status = error.response?.status;
           const message = error.response?.data?.message || error.message;
-          
+
           // Provide user-friendly error messages
           if (status === 400) {
             throw new Error('Missing or invalid authentication data. Please try again.');
@@ -134,7 +167,7 @@ export const useAuthStore = create(
           } else if (error.code === 'ECONNABORTED') {
             throw new Error('Authentication request timed out. Please check your connection and try again.');
           }
-          
+
           throw error;
         } finally {
           set({ isLoading: false });
