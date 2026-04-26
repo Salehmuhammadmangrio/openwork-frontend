@@ -125,7 +125,7 @@ export default function DashOverview() {
 
 
 
-      {!user?.emailVerified && (
+      {!user?.isVerified && (
         <div style={{
           background: 'rgba(255, 193, 7, 0.1)',
           border: '1px solid rgba(255, 193, 7, 0.3)',
