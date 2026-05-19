@@ -284,7 +284,7 @@ export default function BrowseJobs() {
       if (typeFilter === 'fixed') params.budgetType = 'fixed';
       if (typeFilter === 'hourly') params.budgetType = 'hourly';
       fetchJobs(params);
-    }, [category, typeFilter, page, fetchJobs]);
+    }, [search, category, typeFilter, page, fetchJobs]);
 
   const handleSearch = e => {
     setSearch(e.target.value);
