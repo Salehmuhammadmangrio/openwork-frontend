@@ -273,7 +273,7 @@ export default function BrowseOffers() {
     () => {
       fetchOffers({ search, category, sort, page, limit: 12 });
     },
-    [category, sort, page, fetchOffers]);
+    [search, category, sort, page, fetchOffers]);
 
   return (
     <div style={{ paddingTop: 64, minHeight: '100vh' }}>
