@@ -19,7 +19,7 @@ export const getSocket = () => {
   return socket;
 };
 
-export const connectSocket = (userId) => {
+export const connectSocket = (userId, onUserOnline, onUserOffline) => {
   const s = getSocket();
 
   if (!s.connected) {
@@ -46,6 +46,22 @@ export const connectSocket = (userId) => {
     if (userId) {
       s.emit('user:join', { userId });
     }
+  }
+
+  // Set up presence event listeners
+  s.off('user:online');
+  s.off('user:offline');
+  
+  if (onUserOnline) {
+    s.on('user:online', ({ userId: onlineUserId }) => {
+      onUserOnline(onlineUserId);
+    });
+  }
+  
+  if (onUserOffline) {
+    s.on('user:offline', ({ userId: offlineUserId }) => {
+      onUserOffline(offlineUserId);
+    });
   }
 
   return s;

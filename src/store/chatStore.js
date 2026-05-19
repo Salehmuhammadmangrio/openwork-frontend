@@ -6,8 +6,21 @@ export const useChatStore = create((set, get) => ({
   activeConversationId: null,
   messages: {},
   typingStates: {},
+  onlineUsers: new Set(),
   loadingConversations: false,
   loadingMessages: false,
+
+  setUserOnline: (userId) => set((s) => {
+    const updated = new Set(s.onlineUsers);
+    updated.add(userId);
+    return { onlineUsers: updated };
+  }),
+
+  setUserOffline: (userId) => set((s) => {
+    const updated = new Set(s.onlineUsers);
+    updated.delete(userId);
+    return { onlineUsers: updated };
+  }),
 
   fetchConversations: async () => {
     set({ loadingConversations: true });

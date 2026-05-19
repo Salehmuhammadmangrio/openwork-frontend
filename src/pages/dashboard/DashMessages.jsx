@@ -5,7 +5,7 @@ import { Button, Avatar } from '../../components/common/UI';
 import { formatRelative } from '../../utils/helpers';
 import api from '../../utils/api';
 import toast from 'react-hot-toast';
-import { getSocket } from '../../utils/socket';
+import { getSocket, connectSocket } from '../../utils/socket';
 
 export default function DashMessages() {
     const { conversationId } = useParams();
@@ -14,6 +14,7 @@ export default function DashMessages() {
         conversations,
         activeConversationId,
         messages,
+        onlineUsers,
         fetchConversations,
         fetchMessages,
         addMessage,
@@ -21,6 +22,8 @@ export default function DashMessages() {
         updateConversationUnreadCount,
         updateMessageStatus,
         setActive,
+        setUserOnline,
+        setUserOffline,
         loadingConversations,
         loadingMessages,
     } = useChatStore();
@@ -80,7 +83,12 @@ export default function DashMessages() {
 
     // Socket handling
     useEffect(() => {
-        const socket = getSocket();
+        // Connect with presence callbacks
+        const socket = connectSocket(
+            user?._id,
+            (onlineUserId) => setUserOnline(onlineUserId),
+            (offlineUserId) => setUserOffline(offlineUserId)
+        );
         socketRef.current = socket;
 
         if (activeConversationId && user?._id) {
@@ -121,7 +129,7 @@ export default function DashMessages() {
             socket.off('messages_seen');
             socket.off('message:status-update');
         };
-    }, [activeConversationId, user?._id, addMessage, markMessagesAsRead, updateConversationUnreadCount, updateMessageStatus]);
+    }, [activeConversationId, user?._id, addMessage, markMessagesAsRead, updateConversationUnreadCount, updateMessageStatus, setUserOnline, setUserOffline]);
 
     const sendMessage = async () => {
         if (!input.trim() || !activeConversationId) return;
@@ -228,16 +236,22 @@ export default function DashMessages() {
                                         <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>
                                             {group.user.fullName}
                                         </div>
-                                        <div
-                                            style={{
-                                                fontSize: '0.76rem',
-                                                color: 'var(--txt3)',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis',
-                                                whiteSpace: 'nowrap',
-                                            }}
-                                        >
-                                            {latestConv?.lastMessage?.content || 'No messages yet'}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                            <div
+                                                style={{
+                                                    fontSize: '0.76rem',
+                                                    color: 'var(--txt3)',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    whiteSpace: 'nowrap',
+                                                    flex: 1,
+                                                }}
+                                            >
+                                                {latestConv?.lastMessage?.content || 'No messages yet'}
+                                            </div>
+                                            <div style={{ fontSize: '0.65rem', color: onlineUsers.has(group.user._id) ? 'var(--acc2)' : 'var(--txt3)', whiteSpace: 'nowrap' }}>
+                                                ● {onlineUsers.has(group.user._id) ? 'online' : 'away'}
+                                            </div>
                                         </div>
                                     </div>
                                     {group.unreadCount > 0 && (
@@ -282,7 +296,9 @@ export default function DashMessages() {
                         <Avatar user={otherUser} size={42} radius="10px" />
                         <div style={{ flex: 1 }}>
                             <div style={{ fontWeight: 700, fontSize: '1rem' }}>{otherUser.fullName}</div>
-                            <div style={{ fontSize: '0.73rem', color: 'var(--acc2)' }}>● Active now</div>
+                            <div style={{ fontSize: '0.73rem', color: onlineUsers.has(otherUser?._id) ? 'var(--acc2)' : 'var(--txt3)' }}>
+                                ● {onlineUsers.has(otherUser?._id) ? 'Active now' : 'Offline'}
+                            </div>
                         </div>
 
                         <div style={{ display: 'flex', gap: 6 }}>
