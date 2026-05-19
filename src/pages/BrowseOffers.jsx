@@ -250,7 +250,7 @@ export default function BrowseOffers() {
     setLoading(true);
     try {
       const { data } = await api.get('/offers', { params });
-      const list = data.offers.filter((offer) => offer.title.includes(search)) || []
+      const list = data.offers || [];
       setOffers(list);
       setTotal(data.total || list.length);
     } catch {
