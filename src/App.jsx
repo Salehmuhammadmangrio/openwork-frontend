@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { useAuthStore, useNotifStore, useUIStore, useThemeStore } from './store';
 import { connectSocket, disconnectSocket, getSocket } from './utils/socket';
 import api from './utils/api';
 import ErrorBoundary from './components/common/ErrorBoundary';
+import { RouteLoadingFallback } from './components/common/RouteLoadingFallback';
 
 // Layout
 import Navbar from './components/layout/Navbar';
@@ -13,26 +14,28 @@ import AdminRoute from './components/common/AdminRoute';
 import AdminRedirectRoute from './components/common/AdminRedirectRoute';
 import ScrollToTop from './components/common/ScrollToTop';
 
-// Public Pages
-import Landing from './pages/Landing';
-import AboutUs from './pages/AboutUs';
-import Careers from './pages/Careers';
-import Blog from './pages/Blog';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import Terms from './pages/Terms';
-import Security from './pages/Security';
-import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
-import ForgotPassword from './pages/auth/ForgotPassword';
-import ResetPassword from './pages/auth/ResetPassword';
-import VerifyEmail from './pages/auth/VerifyEmail';
+// Public Pages - Lazy loaded for code-splitting
+const Landing = React.lazy(() => import('./pages/Landing'));
+const AboutUs = React.lazy(() => import('./pages/AboutUs'));
+const Careers = React.lazy(() => import('./pages/Careers'));
+const Blog = React.lazy(() => import('./pages/Blog'));
+const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'));
+const Terms = React.lazy(() => import('./pages/Terms'));
+const Security = React.lazy(() => import('./pages/Security'));
 
-// Browse Pages
-import BrowseFreelancers from './pages/BrowseFreelancers';
-import BrowseJobs from './pages/BrowseJobs';
-import BrowseOffers from './pages/BrowseOffers';
-import FreelancerProfile from './pages/FreelancerProfile';
-import JobDetail from './pages/JobDetail';
+// Auth Pages - Lazy loaded
+const Login = React.lazy(() => import('./pages/auth/Login'));
+const Register = React.lazy(() => import('./pages/auth/Register'));
+const ForgotPassword = React.lazy(() => import('./pages/auth/ForgotPassword'));
+const ResetPassword = React.lazy(() => import('./pages/auth/ResetPassword'));
+const VerifyEmail = React.lazy(() => import('./pages/auth/VerifyEmail'));
+
+// Browse Pages - Lazy loaded
+const BrowseFreelancers = React.lazy(() => import('./pages/BrowseFreelancers'));
+const BrowseJobs = React.lazy(() => import('./pages/BrowseJobs'));
+const BrowseOffers = React.lazy(() => import('./pages/BrowseOffers'));
+const FreelancerProfile = React.lazy(() => import('./pages/FreelancerProfile'));
+const JobDetail = React.lazy(() => import('./pages/JobDetail'));
 import OfferDetail from './pages/OfferDetail';
 import ViewProposal from './pages/ViewProposal';
 import EditOffer from './pages/EditOffer';
@@ -182,27 +185,27 @@ function App() {
         <Routes >
           {/* Public */}
           <Route path="/" element={
-            <AdminRedirectRoute><Navbar /><Landing /></AdminRedirectRoute>} />
-          <Route path="/about" element={<AdminRedirectRoute><Navbar /><AboutUs /></AdminRedirectRoute>} />
-          <Route path="/careers" element={<AdminRedirectRoute><Navbar /><Careers /></AdminRedirectRoute>} />
-          <Route path="/blog" element={<AdminRedirectRoute><Navbar /><Blog /></AdminRedirectRoute>} />
-          <Route path="/privacy" element={<AdminRedirectRoute><Navbar /><PrivacyPolicy /></AdminRedirectRoute>} />
-          <Route path="/terms" element={<AdminRedirectRoute><Navbar /><Terms /></AdminRedirectRoute>} />
-          <Route path="/security" element={<AdminRedirectRoute><Navbar /><Security /></AdminRedirectRoute>} />
-          <Route path="/login" element={<AdminRedirectRoute><Navbar /><Login /></AdminRedirectRoute>} />
-          <Route path="/register" element={<AdminRedirectRoute><Navbar /><Register /></AdminRedirectRoute>} />
-          <Route path="/forgot-password" element={<AdminRedirectRoute><Navbar /><ForgotPassword /></AdminRedirectRoute>} />
-          <Route path="/reset-password/:token" element={<AdminRedirectRoute><Navbar /><ResetPassword /></AdminRedirectRoute>} />
-          <Route path="/verify-email" element={<AdminRedirectRoute><ProtectedRoute><Navbar /><VerifyEmail /></ProtectedRoute></AdminRedirectRoute>} />
+            <AdminRedirectRoute><Navbar /><Suspense fallback={<RouteLoadingFallback />}><Landing /></Suspense></AdminRedirectRoute>} />
+          <Route path="/about" element={<AdminRedirectRoute><Navbar /><Suspense fallback={<RouteLoadingFallback />}><AboutUs /></Suspense></AdminRedirectRoute>} />
+          <Route path="/careers" element={<AdminRedirectRoute><Navbar /><Suspense fallback={<RouteLoadingFallback />}><Careers /></Suspense></AdminRedirectRoute>} />
+          <Route path="/blog" element={<AdminRedirectRoute><Navbar /><Suspense fallback={<RouteLoadingFallback />}><Blog /></Suspense></AdminRedirectRoute>} />
+          <Route path="/privacy" element={<AdminRedirectRoute><Navbar /><Suspense fallback={<RouteLoadingFallback />}><PrivacyPolicy /></Suspense></AdminRedirectRoute>} />
+          <Route path="/terms" element={<AdminRedirectRoute><Navbar /><Suspense fallback={<RouteLoadingFallback />}><Terms /></Suspense></AdminRedirectRoute>} />
+          <Route path="/security" element={<AdminRedirectRoute><Navbar /><Suspense fallback={<RouteLoadingFallback />}><Security /></Suspense></AdminRedirectRoute>} />
+          <Route path="/login" element={<AdminRedirectRoute><Navbar /><Suspense fallback={<RouteLoadingFallback />}><Login /></Suspense></AdminRedirectRoute>} />
+          <Route path="/register" element={<AdminRedirectRoute><Navbar /><Suspense fallback={<RouteLoadingFallback />}><Register /></Suspense></AdminRedirectRoute>} />
+          <Route path="/forgot-password" element={<AdminRedirectRoute><Navbar /><Suspense fallback={<RouteLoadingFallback />}><ForgotPassword /></Suspense></AdminRedirectRoute>} />
+          <Route path="/reset-password/:token" element={<AdminRedirectRoute><Navbar /><Suspense fallback={<RouteLoadingFallback />}><ResetPassword /></Suspense></AdminRedirectRoute>} />
+          <Route path="/verify-email" element={<AdminRedirectRoute><ProtectedRoute><Navbar /><Suspense fallback={<RouteLoadingFallback />}><VerifyEmail /></Suspense></ProtectedRoute></AdminRedirectRoute>} />
 
           {/* Browse (public with optional auth) */}
-          <Route path="/freelancers" element={<AdminRedirectRoute><Navbar /><BrowseFreelancers /></AdminRedirectRoute>} />
-          <Route path="/freelancers/:id" element={<AdminRedirectRoute><Navbar /><FreelancerProfile /></AdminRedirectRoute>} />
-          <Route path="/jobs" element={<AdminRedirectRoute><Navbar /><BrowseJobs /></AdminRedirectRoute>} />
-          <Route path="/jobs/:id" element={<AdminRedirectRoute><Navbar /><JobDetail /></AdminRedirectRoute>} />
-          <Route path="/proposals/:id" element={<AdminRedirectRoute><Navbar /><ViewProposal /></AdminRedirectRoute>} />
-          <Route path="/offers" element={<AdminRedirectRoute><Navbar /><BrowseOffers /></AdminRedirectRoute>} />
-          <Route path="/offers/:id" element={<AdminRedirectRoute><Navbar /><OfferDetail /></AdminRedirectRoute>} />
+          <Route path="/freelancers" element={<AdminRedirectRoute><Navbar /><Suspense fallback={<RouteLoadingFallback />}><BrowseFreelancers /></Suspense></AdminRedirectRoute>} />
+          <Route path="/freelancers/:id" element={<AdminRedirectRoute><Navbar /><Suspense fallback={<RouteLoadingFallback />}><FreelancerProfile /></Suspense></AdminRedirectRoute>} />
+          <Route path="/jobs" element={<AdminRedirectRoute><Navbar /><Suspense fallback={<RouteLoadingFallback />}><BrowseJobs /></Suspense></AdminRedirectRoute>} />
+          <Route path="/jobs/:id" element={<AdminRedirectRoute><Navbar /><Suspense fallback={<RouteLoadingFallback />}><JobDetail /></Suspense></AdminRedirectRoute>} />
+          <Route path="/proposals/:id" element={<AdminRedirectRoute><Navbar /><Suspense fallback={<RouteLoadingFallback />}><ViewProposal /></Suspense></AdminRedirectRoute>} />
+          <Route path="/offers" element={<AdminRedirectRoute><Navbar /><Suspense fallback={<RouteLoadingFallback />}><BrowseOffers /></Suspense></AdminRedirectRoute>} />
+          <Route path="/offers/:id" element={<AdminRedirectRoute><Navbar /><Suspense fallback={<RouteLoadingFallback />}><OfferDetail /></Suspense></AdminRedirectRoute>} />
           <Route path="/offers/:id/edit" element={
             <AdminRedirectRoute>
               <ProtectedRoute>
