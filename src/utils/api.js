@@ -3,9 +3,9 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 
 // Timeout configurations
-// For AI service requests: 150s (supports HuggingFace Spaces cold starts: 60-90s)
-// For regular API requests: 30s (Firebase token verification, general operations)
-const DEFAULT_TIMEOUT_MS = 30000; // 30 seconds for regular API requests
+// Default: 200s for all requests (supports 150s AI service requests + overhead)
+// Individual requests can override this via config parameter
+const DEFAULT_TIMEOUT_MS = 200000; // 200 seconds - allows 150s AI requests + buffer
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -53,12 +53,18 @@ const handleSessionExpiration = () => {
   }
 };
 
-// ✅ Attach token
+// ✅ Attach token and ensure AI requests get proper timeout
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('ow-token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  
+  // Ensure AI requests have extended timeout
+  if (config.url && config.url.includes('/ai/')) {
+    config.timeout = 180000; // Force 180s for AI endpoints
+  }
+  
   return config;
 });
 
