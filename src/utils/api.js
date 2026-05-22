@@ -2,9 +2,14 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+// Timeout configurations
+// For AI service requests: 150s (supports HuggingFace Spaces cold starts: 60-90s)
+// For regular API requests: 30s (Firebase token verification, general operations)
+const DEFAULT_TIMEOUT_MS = 30000; // 30 seconds for regular API requests
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
-  timeout: 30000, // Increased to 30s for Firebase token verification
+  timeout: DEFAULT_TIMEOUT_MS,
   headers: { 'Content-Type': 'application/json' },
 });
 

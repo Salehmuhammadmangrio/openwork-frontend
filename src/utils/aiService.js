@@ -13,6 +13,7 @@ import toast from 'react-hot-toast';
 
 // Configuration
 const AI_REQUEST_TIMEOUT_MS = 180000; // 180 seconds (3 minutes) for slow HF Spaces
+const AI_HEALTH_TIMEOUT_MS = 180000; // 180 seconds - health check also needs HF cold start time
 const AI_RETRY_DELAY_MS = 1000; // 1 second between retries
 
 /**
@@ -241,12 +242,12 @@ export const aiService = {
   /**
    * Health check
    * 
-   * Timeout: 10 seconds (should be very fast)
+   * Timeout: 180 seconds (needs HF Spaces cold start time: 60-90s)
    */
   async health() {
     try {
       const data = await makeAIRequest('get', '/ai/health', null, {
-        timeout: 10000,
+        timeout: AI_HEALTH_TIMEOUT_MS,
       });
       return data;
     } catch (error) {
